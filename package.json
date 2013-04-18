@@ -1,0 +1,25 @@
+{
+  "name": "FRDDomotics",
+  "version": "1.0.0",
+  "description": "",
+  "main": "proxy.js",
+  "dependencies": {
+    "colors": "~0.6.0-1",
+    "express": "~3.1.2",
+    "http-proxy": "~0.10.1",
+    "jade": "~0.28.2",
+    "restify": "~2.4.1",
+    "underscore": "~1.4.4",
+    "connect-redis": "1.0.6",
+    "oauth": "0.9.3",
+    "redis": ">= 0.7.0",
+    "querystring": "0.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "",
+  "author": "Sebastien Windal",
+  "license": "BSD"
+}
