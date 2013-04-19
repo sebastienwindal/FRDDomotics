@@ -17,8 +17,8 @@ var apiPort = 8081;
 
 var options = {
   https: {
-    key: fs.readFileSync('crypto/key.pem', 'utf8'),
-    cert: fs.readFileSync('crypto/certificate.pem', 'utf8')
+    key: fs.readFileSync(path.resolve(__dirname, 'crypto/key.pem'), 'utf8'),
+    cert: fs.readFileSync(path.resolve(__dirname, 'crypto/certificate.pem'), 'utf8')
   },
   pathnameOnly: true,
   router: {

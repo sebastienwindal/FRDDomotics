@@ -2,6 +2,7 @@ var restify = require('restify');
 var _ = require('underscore');
 var fs = require('fs');
 var crypto = require('crypto');
+var path = require('path');
 
 function about(req, res, next) {
 
@@ -105,11 +106,11 @@ server.use(function authenticate(req, res, next) {
         return next(new restify.NotAuthorizedError());
 
     // see if we have a user with associated with the user name passed in req.authorization
-    var path = 'users/' + req.authorization.basic.username + '.pwd';
-    if (!fs.existsSync(path)) 
+    var userpath = path.resolve(__dirname, 'users/' + req.authorization.basic.username + '.pwd');
+    if (!fs.existsSync(userpath)) 
         return next(new restify.NotAuthorizedError());;
 
-    var hashedPwd = fs.readFileSync(path, 'ascii').replace(/\s/g, '');
+    var hashedPwd = fs.readFileSync(userpath, 'ascii').replace(/\s/g, '');
     
     // compute the sha 512 hash of the user password
     var strToHash = 'FRDDomotics-' + req.authorization.basic.username + req.authorization.basic.password;
