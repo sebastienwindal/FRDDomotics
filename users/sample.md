@@ -1,1 +1,0 @@
-echo -n "FRDDomotics-sebpwd" | shasum -a 512 | awk '{print tolower($1)}' > seb.pwd
