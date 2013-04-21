@@ -8,8 +8,9 @@ var https = require('https')
   , routes = require('./routes')
   , user = require('./routes/user')
   , path = require('path')
-  , request = require('request');
-
+  , request = require('request')
+  , Sequelize = require("sequelize")
+  ;
 
 var proxyPort = 8000;
 var wwwPort = 8080;
@@ -72,9 +73,33 @@ util.puts('https://host:' + (proxyPort + '').red.bold + '/' + 'api/{path}'.green
 util.puts('https://host:' + (proxyPort + '').red.bold + '/' + '{path}'.green.bold + ' -> http://host:' + (wwwPort + '').red.bold + '/' + '{path}'.green.bold);
 
 
-var sqlite3 = require('sqlite3').verbose();
-var db = new sqlite3.Database('FRDDomotics.db');
-console.log(db);
+var sequelize = new Sequelize('FRDDomotics', '', '', {
+  dialect: 'sqlite',
+  storage: 'FRDDomotics.db'
+})
+
+// create an object we can use to manipulate data in the Temperature table.
+var TemperatureMeasurement = sequelize.define('Temperature', {
+  row_id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+  sensor_id: Sequelize.INTEGER,
+  measurement_date: { type: Sequelize.DATE, defaultValue: Sequelize.NOW },
+  value: { type: Sequelize.FLOAT, allowNull: false }
+}, {
+  // don't add the timestamp attributes (updatedAt, createdAt)
+  timestamps: false
+});
+
+var temperatureRow = TemperatureMeasurement.build(
+                      {
+                        sensor_id: 99999, 
+                        measurement_date: new Date(),
+                        value: 20.3 
+                      });
+temperatureRow.save()
+  .success(function(temperature) {
+    console.log("success!");
+  }).error(function(error) {
+  });
 
 function requestData(timeStamp) {
 
