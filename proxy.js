@@ -95,14 +95,16 @@ var temperatureRow = TemperatureMeasurement.build(
                         measurement_date: new Date(),
                         value: 20.3 
                       });
-temperatureRow.save()
-  .success(function(temperature) {
-    console.log("success!");
-  }).error(function(error) {
-  });
+//temperatureRow.save()
+//  .success(function(temperature) {
+//    console.log("success!");
+//  }).error(function(error) {
+//  });
+
+var lastMeasurementDate = null;
 
 function requestData(timeStamp) {
-
+  lastMeasurementDate = new Date(timeStamp * 1000);
   request.post( 'http://192.168.0.111:8083/ZWaveAPI/Data/' + timeStamp,
               {},
               handleAnswer);  
@@ -111,7 +113,40 @@ function requestData(timeStamp) {
 function handleAnswer(error, response, body) {
   if (!error && response.statusCode == 200) {    
     var obj = JSON.parse(body);
-    console.log(obj);
+    for (key in obj) {
+	var regEx = new RegExp(/^devices\.([0-9]+)\.instances\.0\.commandClasses\.49\.data/);
+	var match = regEx.exec(key);
+        if (match && match[1]) {
+		var sensorID = match[1];
+		console.log('sensorID: ' + sensorID);
+		var data = obj[key];
+		if (data.sensorTypeString) {
+			switch (data.sensorTypeString.value) {
+				case 'Temperature':
+					console.log('Temperature: ' + data.val.value);	
+				var temperatureRow = TemperatureMeasurement.build(
+                      {
+                        sensor_id: sensorID,
+                        measurement_date: lastMeasurementDate,
+                        value: data.val.value
+                      });
+temperatureRow.save()
+  .success(function(temperature) {
+    console.log("success!");
+  }).error(function(error) {
+	console.log(error);
+  });
+					break;
+				case 'Luminiscence':
+					console.log('Luminiscence: ' + data.val.value);
+					break;
+				case 'Humidity':
+					console.log('Humidity: ' + data.val.value);
+					break;
+			}
+		}
+	}
+    }
     setTimeout(function () {
                   requestData(obj.updateTime);
               }, 10000);
