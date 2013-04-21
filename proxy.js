@@ -7,7 +7,8 @@ var https = require('https')
   , express = require('express')
   , routes = require('./routes')
   , user = require('./routes/user')
-  , path = require('path');
+  , path = require('path')
+  , request = require('request');
 
 
 var proxyPort = 8000;
@@ -69,3 +70,27 @@ util.puts('https proxy server'.blue + ' started '.green.bold + 'on port '.blue +
 util.puts('proxy routing:'.white.bold);
 util.puts('https://host:' + (proxyPort + '').red.bold + '/' + 'api/{path}'.green.bold + ' -> http://host:' + (apiPort + '').red.bold + '/'+ '{path}'.green.bold);
 util.puts('https://host:' + (proxyPort + '').red.bold + '/' + '{path}'.green.bold + ' -> http://host:' + (wwwPort + '').red.bold + '/' + '{path}'.green.bold);
+
+
+var sqlite3 = require('sqlite3').verbose();
+var db = new sqlite3.Database('FRDDomotics.db');
+console.log(db);
+
+function requestData(timeStamp) {
+
+  request.post( 'http://192.168.0.111:8083/ZWaveAPI/Data/' + timeStamp,
+              {},
+              handleAnswer);  
+}
+
+function handleAnswer(error, response, body) {
+  if (!error && response.statusCode == 200) {    
+    var obj = JSON.parse(body);
+    console.log(obj);
+    setTimeout(function () {
+                  requestData(obj.updateTime);
+              }, 10000);
+  }
+}
+
+requestData('1367507213');
