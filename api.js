@@ -3,6 +3,7 @@ var _ = require('underscore');
 var fs = require('fs');
 var crypto = require('crypto');
 var path = require('path');
+var storage = require('./FRDDomoticsStorage.js');
 
 function about(req, res, next) {
 
@@ -76,6 +77,8 @@ function temperature(req, res, next) {
     if (list.length == 0) {
         return next(new restify.BadRequestError("no temperature sensor with id '" + req.params.sensorID + "'"));
     }
+
+    storate.GetLastTemperatureForSensor(2, function() {});
 
     var temperatures = { 
             most_recent_measurement_date: new Date(),
