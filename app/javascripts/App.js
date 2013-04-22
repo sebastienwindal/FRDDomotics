@@ -2,6 +2,7 @@ var app = angular.module('FRDDomoticsApp', []);
 
 app.config(['$routeProvider', function($routeProvider) {
   $routeProvider.
-      when('/q', {templateUrl: 'partials/index.html',   controller: MainCtrl }).
+      when('/temperature/:sensorID', {templateUrl: 'partials/temperature.html',   controller: TemperatureCtrl }).
+      when('/luminosity/:sensorID', {templateUrl: 'partials/luminosity.html', controller: LuminosityCtrl }).
       otherwise({redirectTo: '/404'});
 }]);
