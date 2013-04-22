@@ -69,7 +69,7 @@ function sensors(req, res, next) {
     res.next();
 }
 
-function temperature(req, res, next) {
+function getTemperature(req, res, next) {
 
     // double check the sensor exist
     var list = _.where(sensorList, { id: req.params.sensorID, type: 'temperature' });
@@ -92,6 +92,41 @@ function temperature(req, res, next) {
 						return next(new restify.BadRequestError(err));
 					});
 }
+
+function getHumidity(req, res, next) {
+
+    var numberPoints = 9999999999;
+    if (req.params.numberPoints) {
+        numberPoints = req.params.numberPoints;
+    }
+
+    storage.GetHumidityForSensor(req.params.sensorID, numberPoints, 
+                    function success(data) {
+                        res.send(data);
+                            next();
+                    },
+                    function error(err) {
+                        return next(new restify.BadRequestError(err));
+                    });   
+}
+
+function getLuminosity(req, res, next) {
+
+    var numberPoints = 9999999999;
+    if (req.params.numberPoints) {
+        numberPoints = req.params.numberPoints;
+    }
+
+    storage.GetLuminosityForSensor(req.params.sensorID, numberPoints, 
+                    function success(data) {
+                        res.send(data);
+                            next();
+                    },
+                    function error(err) {
+                        return next(new restify.BadRequestError(err));
+                    });   
+}
+
 
 function wrongRoute(req, res, next) {
     return next(new restify.ResourceNotFoundError(req.path() + " does not exist."));
@@ -137,7 +172,9 @@ server.get('/about', about);
 server.get('/about/:option', about);
 server.get('/sensors', sensors);
 server.get('/sensors/:sensorID', sensors);
-server.get('/temperature/:sensorID', temperature);
+server.get('/temperature/:sensorID', getTemperature);
+server.get('/humidity/:sensorID', getHumidity);
+server.get('/luminosity/:sensorID', getLuminosity);
 server.get(/./, wrongRoute);
 
 var startDate = new Date();
