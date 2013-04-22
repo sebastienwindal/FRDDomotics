@@ -1,7 +1,7 @@
-function TemperatureCtrl($scope, $routeParams, $http) {
-
+function HumidityCtrl($scope, $routeParams, $http) {
+ 
     $http.defaults.headers.common['Authorization'] = 'Basic ' + Base64.encode('seb:password'); 
-    $http.get("/api/temperature/" + $routeParams.sensorID + "?numberPoints=360", {})
+    $http.get("/api/humidity/" + $routeParams.sensorID + "?numberPoints=360", {})
         .success(function(data, status, headers, config) {
             $scope.data = data;
             $scope.updateChart();
@@ -34,8 +34,8 @@ function TemperatureCtrl($scope, $routeParams, $http) {
     $scope.sinAndCos = function() {
         var sin = [];
         var now = new Date($scope.data.most_recent_measurement_date).getTime();
-        for (var i in $scope.data.temperatures) {
-            sin.push({x: now-$scope.data.date_offset[i]*1000, y: $scope.data.temperatures[i]});
+        for (var i in $scope.data.humidity) {
+            sin.push({x: now-$scope.data.date_offset[i]*1000, y: $scope.data.humidity[i]});
         }
 
         return [
