@@ -142,7 +142,7 @@ function GetHumidityForSensor(sensorID, numberPoints, successFn, errorFn) {
 
     var result = {};
 
-    THumidityMeasurement.findAll({  where: ['sensor_id=?', sensorID],
+    HumidityMeasurement.findAll({  where: ['sensor_id=?', sensorID],
                                     order: 'measurement_date DESC', 
                                     limit: numberPoints})
                         .success(function(hum) {
