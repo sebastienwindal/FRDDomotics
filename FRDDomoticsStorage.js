@@ -101,6 +101,18 @@ function SaveLuminosity(sensorID, date, luminosity, successFn, errorFn) {
 }
 
 
+function GetLastTemperatureForSensor(sensorID, successFn) {
+
+    TemperatureMeasurement  .findAll({  where: ['sensor_id=?', sensorID],
+                                        order: 'measurement_date DESC', 
+                                        limit: 1})
+                            .on('success', function(temp) {
+                                console.log(temp);
+                            });
+}
+
+
 exports.SaveLuminosity = SaveLuminosity;
 exports.SaveHumidity = SaveHumidity;
 exports.SaveTemperature = SaveTemperature;
+exports.GetLastTemperatureForSensor = GetLastTemperatureForSensor;
