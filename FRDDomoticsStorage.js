@@ -121,7 +121,7 @@ function GetTemperaturesForSensor(sensorID, numberPoints, successFn, errorFn) {
                                 if (temp.length > 0) {
                                     result.most_recent_measurement_date = temp[0].selectedValues.measurement_date;
 				    
-				                    var lastTimestamp = result.last_measurement_date.getTime()/1000;
+				                    var lastTimestamp = result.most_recent_measurement_date.getTime()/1000;
 
                                     for (i in temp) {
                                         var point = temp[i].selectedValues;
