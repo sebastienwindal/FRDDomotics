@@ -78,15 +78,14 @@ function temperature(req, res, next) {
         return next(new restify.BadRequestError("no temperature sensor with id '" + req.params.sensorID + "'"));
     }
 
-    storate.GetLastTemperatureForSensor(2, function() {});
-
-    var temperatures = { 
-            most_recent_measurement_date: new Date(),
-            temperatures : [ 22, 22, 23, 24, 25 ], 
-            measurement_time_offset : [ 0, 1, 2, 3, 4 ]
-        };
-    res.send(temperatures);
-    res.next();
+    storage.GetLastTemperatureForSensor(2, 
+					function success(data) {
+						res.send(data);
+    						next();
+					},
+					function error(err) {
+						return next(new restify.BadRequestError(err));
+					});
 }
 
 function wrongRoute(req, res, next) {
@@ -136,9 +135,7 @@ server.get('/sensors/:sensorID', sensors);
 server.get('/temperature/:sensorID', temperature);
 server.get(/./, wrongRoute);
 
-
 var startDate = new Date();
-
 
 server.listen(8081, function() {
   console.log('%s listening at %s', server.name, server.url);
