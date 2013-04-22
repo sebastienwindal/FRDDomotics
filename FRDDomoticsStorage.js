@@ -127,7 +127,7 @@ function GetTemperaturesForSensor(sensorID, numberPoints, successFn, errorFn) {
                                         var point = temp[i].selectedValues;
                                         result.temperatures.push(point.value);
 					                    var deltaTime = lastTimestamp - point.measurement_date.getTime()/1000; 
-                                        result.measurement_time_offset.push(deltaTime);
+                                        result.date_offset.push(deltaTime);
                                     }
                                 }
                                 successFn(result);
