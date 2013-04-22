@@ -4,12 +4,10 @@ var https = require('https')
   , colors = require('colors')
   , httpProxy = require('http-proxy')
   , fs = require('fs')
-  , express = require('express')
-  , routes = require('./routes')
-  , user = require('./routes/user')
   , path = require('path')
   , request = require('request')
   , storage = require('./FRDDomoticsStorage.js')
+  , static = require('node-static')
   ;
 
 var proxyPort = 8000;
@@ -35,34 +33,15 @@ var options = {
 //
 httpProxy.createServer(options).listen(8000);
 
-var app = express();
+// the actual web server
+var file = new(static.Server)('./app');
+require('http').createServer(function (request, response) {
+    request.addListener('end', function () {
+        // Serve files!
+        file.serve(request, response);
+    });
+}).listen(wwwPort);
 
-app.configure(function(){
-    app.set('port', wwwPort);
-    app.set('views', __dirname + '/views');
-    app.set('view engine', 'jade');
-    app.use(express.favicon());
-    app.use(express.logger('dev'));
-    app.use(express.bodyParser());
-    app.use(express.methodOverride());
-    app.use(app.router);
-    app.use(express.static(path.join(__dirname, 'public')));
-});
-
-app.enable('trust proxy');
-
-app.configure('development', function(){
-    app.use(express.errorHandler());
-});
-
-app.get('/', routes.index);
-
-//
-// Create the target HTTPS server 
-//
-http.createServer(app).listen(app.get('port'), function(){
-    util.puts('Express server '.blue + 'started '.green.bold + 'on port '.blue + ('' + wwwPort).yellow);  
-});
 
 util.puts('https proxy server'.blue + ' started '.green.bold + 'on port '.blue + ('' + proxyPort).yellow);
 
