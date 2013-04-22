@@ -110,7 +110,6 @@ function GetTemperaturesForSensor(sensorID, numberPoints, successFn, errorFn) {
 
     var result = {};
 
-
     TemperatureMeasurement  .findAll({  where: ['sensor_id=?', sensorID],
                                         order: 'measurement_date DESC', 
                                         limit: numberPoints})
@@ -118,16 +117,17 @@ function GetTemperaturesForSensor(sensorID, numberPoints, successFn, errorFn) {
                                 result.sensorID = sensorID;
                                 result.temperatures = [];
                                 result.date_offset = [];
+
                                 if (temp.length > 0) {
-                                    result.last_measurement_date = temp[0].selectedValues.measurement_date;
+                                    result.most_recent_measurement_date = temp[0].selectedValues.measurement_date;
 				    
-				    var lastTimestamp = result.last_measurement_date.getTime()/1000;
+				                    var lastTimestamp = result.last_measurement_date.getTime()/1000;
 
                                     for (i in temp) {
                                         var point = temp[i].selectedValues;
                                         result.temperatures.push(point.value);
-					var deltaTime = lastTimestamp - point.measurement_date.getTime()/1000; 
-                                        result.date_offset.push(deltaTime);
+					                    var deltaTime = lastTimestamp - point.measurement_date.getTime()/1000; 
+                                        result.measurement_time_offset.push(deltaTime);
                                     }
                                 }
                                 successFn(result);
@@ -136,8 +136,6 @@ function GetTemperaturesForSensor(sensorID, numberPoints, successFn, errorFn) {
                                 errorFn(err);   
                             });
 }
-
-
 
 exports.SaveLuminosity = SaveLuminosity;
 exports.SaveHumidity = SaveHumidity;
