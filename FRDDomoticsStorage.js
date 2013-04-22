@@ -103,22 +103,41 @@ function SaveLuminosity(sensorID, date, luminosity, successFn, errorFn) {
 
 function GetLastTemperatureForSensor(sensorID, successFn, errorFn) {
 
+    GetTemperatureForSensor(sensorID, 1, successFn, errorFn);
+}
+
+function GetTemperaturesForSensor(sensorID, numberPoints, successFn, errorFn) {
+
+    var result = {};
+
+
     TemperatureMeasurement  .findAll({  where: ['sensor_id=?', sensorID],
                                         order: 'measurement_date DESC', 
-                                        limit: 1})
+                                        limit: numberPoints})
                             .success(function(temp) {
-				if (temp.length > 0)
-                                	successFn(temp[0].selectedValues);
-				else
-					successFn({});
+                                result.sensorID = sensorID;
+                                result.temperatures = [];
+                                results.date_offset = [];
+                                if (temp.length > 0) {
+                                    result.last_measurement_date = temp[0].selectedValues.measurement_date;
+
+                                    for (i in temp) {
+                                        var point = temp[i].selectedValues;
+                                        result.temperatures.push(point.value);
+                                        result.date_offset.push(point.measurement_date);
+                                    }
+                                }
+                                successFn(result);
                             })
-			    .error(function(err) {
-				errorFn(err);	
-			    });
+                            .error(function(err) {
+                                errorFn(err);   
+                            });
 }
+
 
 
 exports.SaveLuminosity = SaveLuminosity;
 exports.SaveHumidity = SaveHumidity;
 exports.SaveTemperature = SaveTemperature;
 exports.GetLastTemperatureForSensor = GetLastTemperatureForSensor;
+exports.GetTemperaturesForSensor = GetTemperaturesForSensor;
