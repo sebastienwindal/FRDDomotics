@@ -1,3 +1,4 @@
 crypto/*.pem
 users/*.pwd
 node_modules/*
+FRDDomotics.db
