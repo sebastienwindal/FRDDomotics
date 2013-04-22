@@ -134,5 +134,5 @@ function handleAnswer(error, response, body) {
                     }, 10000);
     }
 }
-
-requestData((new Date()).getTime()/1000);
+var timeStamp = Math.floor((new Date()).getTime() / 1000);
+requestData(timeStamp);
