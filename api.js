@@ -78,7 +78,7 @@ function temperature(req, res, next) {
         return next(new restify.BadRequestError("no temperature sensor with id '" + req.params.sensorID + "'"));
     }
 
-    storage.GetTemperaturesForSensor(2, 
+    storage.GetTemperaturesForSensor(2, 50, 
 					function success(data) {
 						res.send(data);
     						next();

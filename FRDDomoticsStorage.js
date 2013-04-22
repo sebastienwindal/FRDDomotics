@@ -117,14 +117,17 @@ function GetTemperaturesForSensor(sensorID, numberPoints, successFn, errorFn) {
                             .success(function(temp) {
                                 result.sensorID = sensorID;
                                 result.temperatures = [];
-                                results.date_offset = [];
+                                result.date_offset = [];
                                 if (temp.length > 0) {
                                     result.last_measurement_date = temp[0].selectedValues.measurement_date;
+				    
+				    var lastTimestamp = result.last_measurement_date.getTime()/1000;
 
                                     for (i in temp) {
                                         var point = temp[i].selectedValues;
                                         result.temperatures.push(point.value);
-                                        result.date_offset.push(point.measurement_date);
+					var deltaTime = lastTimestamp - point.measurement_date.getTime()/1000; 
+                                        result.date_offset.push(deltaTime);
                                     }
                                 }
                                 successFn(result);
