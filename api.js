@@ -29,46 +29,6 @@ function about(req, res, next) {
     return next(new restify.BadRequestError("unknown argument '" + req.params.option + "'"));
 }
 
-var sensorList = [ {   type: 'temperature',
-                    id: '1', 
-                    name: 'on board sensor 1',
-                    description: '',
-                    location: 'living room'
-                },
-                {   type: 'temperature',
-                    id: '2', 
-                    name: 'outside sensor',
-                    description: '',
-                    location: 'patio'
-                },
-                {   type: 'humidity',
-                    id: '3', 
-                    name: 'outside humidity sensor',
-                    description: '',
-                    location: 'patio'
-                }
-                ];
-
-
-function sensors(req, res, next) {
-
-    if (!req.params.sensorID) {
-        var list = sensorList;
-        if (req.params.type) {
-            list = _.where(sensorList, { type: req.params.type });
-        }
-        res.send(list);
-        res.next();        
-    }
-
-    var sensorSublist = _.where(sensorList, { id: req.params.sensorID });
-    if (sensorSublist.length == 0) {
-        return next(new restify.BadRequestError("no sensor with id '" + req.params.sensorID + "'"));
-    }
-    res.send(sensorSublist[0]);
-    res.next();
-}
-
 function getTemperature(req, res, next) {
 
     // double check the sensor exist
@@ -120,13 +80,49 @@ function getLuminosity(req, res, next) {
     storage.GetLuminosityForSensor(req.params.sensorID, numberPoints, 
                     function success(data) {
                         res.send(data);
-                            next();
+                        next();
                     },
                     function error(err) {
                         return next(new restify.BadRequestError(err));
                     });   
 }
 
+
+function getAllSensors(req, res, next) {
+    
+    storage.GetAllSensors(function success(data) {
+        res.send(data);
+        next();
+    },
+    function error(err) {
+        return next(new restify.BadRequestError(err));
+    });   
+}
+
+function getSensor(req, res, next) {
+    storage.GetSensor(  req.params.sensorID,
+                        function success(data) {
+                            res.send(data);
+                            next();
+                        },
+                        function error(err) {
+                            return next(new restify.BadRequestError(err));
+                        });   
+
+}
+
+function updateSensor(req, res, next) {
+    storage.UpdateSensor(  req.params.sensorID,
+                            {},
+                            function success(data) {
+                                res.send(data);
+                                next();
+                            },
+                            function error(err) {res.send(data);
+                                next();
+                                return next(new restify.BadRequestError(err));
+                            });
+}
 
 function wrongRoute(req, res, next) {
     return next(new restify.ResourceNotFoundError(req.path() + " does not exist."));
@@ -170,11 +166,14 @@ server.use(restify.queryParser());
 
 server.get('/about', about);
 server.get('/about/:option', about);
-server.get('/sensors', sensors);
-server.get('/sensors/:sensorID', sensors);
+server.get('/sensors', getAllSensors);
+server.get('/sensor/:sensorID', getSensor);
+server.put('/sensor/:sensorID', updateSensor);
+//server.get('/sensors/:sensorID', sensors);
 server.get('/temperature/:sensorID', getTemperature);
 server.get('/humidity/:sensorID', getHumidity);
 server.get('/luminosity/:sensorID', getLuminosity);
+
 server.get(/./, wrongRoute);
 
 var startDate = new Date();

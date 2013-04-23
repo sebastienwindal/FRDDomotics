@@ -52,6 +52,32 @@ var LuminosityMeasurement = sequelize.define(   'Luminosity',
                                                 );
 
 
+var Sensor = sequelize.define(  'Sensor',
+                                {
+                                    row_id: {   type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+                                    sensor_id: Sequelize.INTEGER,
+                                    name: Sequelize.STRING,
+                                    location: Sequelize.STRING
+                                },
+                                {
+                                    timestamps: false
+                                }
+                                );
+
+var SensorType = sequelize.define(  'SensorType',
+                                    {
+                                        row_id: {   type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+                                        sensor_id: Sequelize.INTEGER,
+                                        type: Sequelize.STRING
+                                    },
+                                    {
+                                        timestamps: false
+                                    }
+                                    );
+
+Sensor.hasMany(SensorType, {as: 'sensorTypes'});
+
+
 function SaveTemperature(sensorID, date, temperature, successFn, errorFn) {
     var temperatureRow = TemperatureMeasurement.build(
                             {
@@ -201,6 +227,66 @@ function GetLuminosityForSensor(sensorID, numberPoints, successFn, errorFn) {
                             });
 }
 
+function GetAllSensors(successFn, errorFn) {
+
+    var result = [];
+
+    Sensor  .findAll()
+            .success(function(sensors) {
+                var result = [];
+                for (var i in sensors) {
+                    result.push({
+                        sensor_id: sensors[i].sensor_id,
+                        name: sensors[i].name,
+                        location: sensors[i].location,
+                        types: ""
+                    });
+                }
+                successFn(result);
+            })
+            .error(function(err) {
+                errorFn(err);
+            })
+}
+
+
+function GetSensor(sensorID, successFn, errorFn) {
+    var result = {};
+
+    Sensor  .findAll({  where: ['sensor_id=?', sensorID],
+                        limit: 1 })
+            .success(function(sensors) {
+                
+                if (sensors.length > 0) {
+                    result.sensor_id = sensors[0].sensor_id;
+                    result.name = sensors[0].name;
+                    result.location = sensors[0].location;
+                    result.types = "";
+                    successFn(result);
+                } else {
+                    errorFn("No such sensor");
+                }
+                
+            })
+            .error(function(err) {
+                errorFn(err);
+            });
+}
+
+
+function UpdateSensor(sensorID, data, successFn, errorFn) {
+    
+    Sensor.find({sensorID: sensorID}).success(function(sensor) {
+        if (sensor) {
+            sensor.name = data.name;
+            sensor.description = data.description;
+            sensor.save().success(successFn).error(errorFn);
+        } else {
+            errorFn("could not find sensor.");
+        }
+    });
+}
+
 exports.SaveLuminosity = SaveLuminosity;
 exports.SaveHumidity = SaveHumidity;
 exports.SaveTemperature = SaveTemperature;
@@ -208,3 +294,6 @@ exports.GetLastTemperatureForSensor = GetLastTemperatureForSensor;
 exports.GetTemperaturesForSensor = GetTemperaturesForSensor;
 exports.GetHumidityForSensor = GetHumidityForSensor;
 exports.GetLuminosityForSensor = GetLuminosityForSensor;
+exports.GetSensor = GetSensor;
+exports.GetAllSensors = GetAllSensors;
+exports.UpdateSensor = UpdateSensor;
