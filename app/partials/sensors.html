@@ -1,0 +1,11 @@
+<div >
+    <ul>
+        <li ng-repeat="sensor in sensors">
+            {{sensor.name}} - {{sensor.location}} 
+                [<a ng-click="showTemperature(sensor)">Temperature</a>]
+                [<a ng-click="showHumidity(sensor)">Humidity</a>]
+                [<a ng-click="showLuminosity(sensor)">Luminosity</a>]
+        </li>
+    </ul>
+    {{status}}
+</div>

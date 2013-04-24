@@ -112,14 +112,14 @@ function getSensor(req, res, next) {
 }
 
 function updateSensor(req, res, next) {
-    storage.UpdateSensor(  req.params.sensorID,
-                            {},
+
+    storage.UpdateSensor(   req.params.sensorID,
+                            req.body,
                             function success(data) {
                                 res.send(data);
                                 next();
                             },
-                            function error(err) {res.send(data);
-                                next();
+                            function error(err) {
                                 return next(new restify.BadRequestError(err));
                             });
 }
@@ -134,6 +134,7 @@ var server = restify.createServer({
 });
 
 server.use(restify.authorizationParser());
+server.use(restify.bodyParser({ mapParams: false }));
 server.use(function authenticate(req, res, next) {
 
     if (!req || 
@@ -169,7 +170,7 @@ server.get('/about/:option', about);
 server.get('/sensors', getAllSensors);
 server.get('/sensor/:sensorID', getSensor);
 server.put('/sensor/:sensorID', updateSensor);
-//server.get('/sensors/:sensorID', sensors);
+
 server.get('/temperature/:sensorID', getTemperature);
 server.get('/humidity/:sensorID', getHumidity);
 server.get('/luminosity/:sensorID', getLuminosity);

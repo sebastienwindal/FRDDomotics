@@ -273,13 +273,12 @@ function GetSensor(sensorID, successFn, errorFn) {
             });
 }
 
-
 function UpdateSensor(sensorID, data, successFn, errorFn) {
     
-    Sensor.find({sensorID: sensorID}).success(function(sensor) {
+    Sensor.find({  where: ['sensor_id=?', sensorID] }).success(function(sensor) {
         if (sensor) {
             sensor.name = data.name;
-            sensor.description = data.description;
+            sensor.location = data.location;
             sensor.save().success(successFn).error(errorFn);
         } else {
             errorFn("could not find sensor.");
