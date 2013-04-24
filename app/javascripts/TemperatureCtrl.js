@@ -1,14 +1,26 @@
 function TemperatureCtrl($scope, $routeParams, $http) {
 
-    $http.defaults.headers.common['Authorization'] = 'Basic ' + Base64.encode('seb:password'); 
-    $http.get("/api/temperature/" + $routeParams.sensorID + "?numberPoints=360", {})
-        .success(function(data, status, headers, config) {
-            $scope.data = data;
-            $scope.updateChart();
-        })
-        .error(function(data, status, headers, config) {
-            $scope.status = data;
-        });
+    $scope.timeInterval = null;
+
+    $scope.$watch("timeInterval", function(newValue, oldValue) {
+        if (newValue && newValue != oldValue) {
+            alert(newValue.timeSpan);
+            $scope.fetchData(newValue);
+        }
+    });
+
+    $scope.fetchData = function(timeOption) {
+
+        $http.defaults.headers.common['Authorization'] = 'Basic ' + Base64.encode('seb:password'); 
+        $http.get("/api/temperature/" + $routeParams.sensorID + "?timeSpan=" + timeOption.timeSpan, {})
+            .success(function(data, status, headers, config) {
+                $scope.data = data;
+                $scope.updateChart();
+            })
+            .error(function(data, status, headers, config) {
+                $scope.status = data;
+            });
+    };
 
     $scope.updateChart = function() {
         nv.addGraph(function() {
