@@ -127,7 +127,7 @@ function SaveLuminosity(sensorID, date, luminosity, successFn, errorFn) {
 }
 
 
-function FilterFromOptions(options) {
+function FilterFromOptions(options, sensorID) {
     
     var filter = {  where: ['sensor_id=?', sensorID],
                     order: 'measurement_date DESC'
@@ -156,7 +156,7 @@ function GetTemperaturesForSensor(sensorID, options, successFn, errorFn) {
 
     var result = {};
 
-    var filter = FilterFromOptions(options);
+    var filter = FilterFromOptions(options, sensorID);
 
     TemperatureMeasurement  .findAll(filter)
                             .success(function(temp) {
@@ -188,7 +188,7 @@ function GetHumidityForSensor(sensorID, options, successFn, errorFn) {
 
     var result = {};
 
-    var filter = FilterFromOptions(options);
+    var filter = FilterFromOptions(options, sensorID);
 
     HumidityMeasurement .findAll(filter)
                         .success(function(hum) {
@@ -221,7 +221,7 @@ function GetLuminosityForSensor(sensorID, options, successFn, errorFn) {
 
     var result = {};
 
-    var filter = FilterFromOptions(options);
+    var filter = FilterFromOptions(options, sensorID);
 
     LuminosityMeasurement   .findAll(filter)
                             .success(function(lum) {
