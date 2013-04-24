@@ -78,13 +78,13 @@ function getLuminosity(req, res, next) {
         options.numberPoints = req.params.numberPoints;
     }
     if (req.params.startDate) {
-        option.startDate = req.params.startDate;
+        options.startDate = req.params.startDate;
     }
     if (req.params.endDate) {
-        option.startDate = req.params.endDate;
+        options.startDate = req.params.endDate;
     }
     if (req.params.timeSpan) {
-        option.timeSpan = req.params.timeSpan;
+        options.timeSpan = req.params.timeSpan;
     }
 
     storage.GetLuminosityForSensor(req.params.sensorID, options, 

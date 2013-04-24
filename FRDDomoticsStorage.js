@@ -210,9 +210,11 @@ function GetLuminosityForSensor(sensorID, options, successFn, errorFn) {
     if (options.startDate && options.endDate) {
         filter.where = ["sensor_id=? AND measurement_date >= ? AND measurement_date <= ?", sensorID, options.startDate, options.endDate];
     }
-    if (option.timeSpan) {
+console.log(options);
+    if (options.timeSpan) {
         var endDate = new Date();
-        var startDate = new Date(endDate.getTime() - option.timeSpan * 1000);
+        var startDate = new Date(endDate.getTime() - options.timeSpan * 1000);
+        console.log(startDate);
         filter.where = ["sensor_id=? AND measurement_date >= ? AND measurement_date <= ?", sensorID, startDate, endDate];   
     }
 
