@@ -127,18 +127,38 @@ function SaveLuminosity(sensorID, date, luminosity, successFn, errorFn) {
 }
 
 
+function FilterFromOptions(options) {
+    
+    var filter = {  where: ['sensor_id=?', sensorID],
+                    order: 'measurement_date DESC'
+                    };
+
+    if (options.numberPoints) {
+        filter.limit = options.numberPoints;
+    }
+    if (options.startDate && options.endDate) {
+        filter.where = ["sensor_id=? AND measurement_date >= ? AND measurement_date <= ?", sensorID, options.startDate, options.endDate];
+    }
+    if (options.timeSpan) {
+        var endDate = new Date();
+        var startDate = new Date(endDate.getTime() - options.timeSpan * 1000);
+        filter.where = ["sensor_id=? AND measurement_date >= ? AND measurement_date <= ?", sensorID, startDate, endDate];   
+    }
+    return filter;
+}
+
 function GetLastTemperatureForSensor(sensorID, successFn, errorFn) {
 
     GetTemperatureForSensor(sensorID, 1, successFn, errorFn);
 }
 
-function GetTemperaturesForSensor(sensorID, numberPoints, successFn, errorFn) {
+function GetTemperaturesForSensor(sensorID, options, successFn, errorFn) {
 
     var result = {};
 
-    TemperatureMeasurement  .findAll({  where: ['sensor_id=?', sensorID],
-                                        order: 'measurement_date DESC', 
-                                        limit: numberPoints})
+    var filter = FilterFromOptions(options);
+
+    TemperatureMeasurement  .findAll(filter)
                             .success(function(temp) {
                                 result.sensorID = sensorID;
                                 result.temperatures = [];
@@ -164,13 +184,13 @@ function GetTemperaturesForSensor(sensorID, numberPoints, successFn, errorFn) {
 }
 
 
-function GetHumidityForSensor(sensorID, numberPoints, successFn, errorFn) {
+function GetHumidityForSensor(sensorID, options, successFn, errorFn) {
 
     var result = {};
 
-    HumidityMeasurement.findAll({  where: ['sensor_id=?', sensorID],
-                                    order: 'measurement_date DESC', 
-                                    limit: numberPoints})
+    var filter = FilterFromOptions(options);
+
+    HumidityMeasurement .findAll(filter)
                         .success(function(hum) {
                             result.sensorID = sensorID;
                             result.humidity = [];
@@ -196,27 +216,12 @@ function GetHumidityForSensor(sensorID, numberPoints, successFn, errorFn) {
 }
 
 
+
 function GetLuminosityForSensor(sensorID, options, successFn, errorFn) {
 
     var result = {};
 
-    var filter = {  where: ['sensor_id=?', sensorID],
-                    order: 'measurement_date DESC'
-                    };
-
-    if (options.numberPoints) {
-        filter.limit = options.numberPoints;
-    }
-    if (options.startDate && options.endDate) {
-        filter.where = ["sensor_id=? AND measurement_date >= ? AND measurement_date <= ?", sensorID, options.startDate, options.endDate];
-    }
-console.log(options);
-    if (options.timeSpan) {
-        var endDate = new Date();
-        var startDate = new Date(endDate.getTime() - options.timeSpan * 1000);
-        console.log(startDate);
-        filter.where = ["sensor_id=? AND measurement_date >= ? AND measurement_date <= ?", sensorID, startDate, endDate];   
-    }
+    var filter = FilterFromOptions(options);
 
     LuminosityMeasurement   .findAll(filter)
                             .success(function(lum) {

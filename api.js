@@ -29,51 +29,11 @@ function about(req, res, next) {
     return next(new restify.BadRequestError("unknown argument '" + req.params.option + "'"));
 }
 
-function getTemperature(req, res, next) {
 
-    // double check the sensor exist
-    //var list = _.where(sensorList, { id: req.params.sensorID, type: 'temperature' });
-
-    //if (list.length == 0) {
-    //    return next(new restify.BadRequestError("no temperature sensor with id '" + req.params.sensorID + "'"));
-    //}
-
-    var numberPoints = 9999999999;
-    if (req.params.numberPoints) {
-        numberPoints = req.params.numberPoints;
-    }
-
-    storage.GetTemperaturesForSensor(req.params.sensorID, numberPoints, 
-					function success(data) {
-						res.send(data);
-    						next();
-					},
-					function error(err) {
-						return next(new restify.BadRequestError(err));
-					});
-}
-
-function getHumidity(req, res, next) {
-
-    var numberPoints = 9999999999;
-    if (req.params.numberPoints) {
-        numberPoints = req.params.numberPoints;
-    }
-
-    storage.GetHumidityForSensor(req.params.sensorID, numberPoints, 
-                    function success(data) {
-                        res.send(data);
-                            next();
-                    },
-                    function error(err) {
-                        return next(new restify.BadRequestError(err));
-                    });   
-}
-
-function getLuminosity(req, res, next) {
-
-    var numberPoints = 9999999999;
+function getOptionsFromQueryString(req) {
+    
     var options = {};
+
     if (req.params.numberPoints) {
         options.numberPoints = req.params.numberPoints;
     }
@@ -86,6 +46,41 @@ function getLuminosity(req, res, next) {
     if (req.params.timeSpan) {
         options.timeSpan = req.params.timeSpan;
     }
+    return options;
+}
+
+function getTemperature(req, res, next) {
+
+    var options = getOptionsFromQueryString(req);
+
+    storage.GetTemperaturesForSensor(req.params.sensorID, options, 
+					function success(data) {
+						res.send(data);
+    						next();
+					},
+					function error(err) {
+						return next(new restify.BadRequestError(err));
+					});
+}
+
+function getHumidity(req, res, next) {
+
+    var options = getOptionsFromQueryString(req);
+
+    storage.GetHumidityForSensor(req.params.sensorID, options, 
+                    function success(data) {
+                        res.send(data);
+                            next();
+                    },
+                    function error(err) {
+                        return next(new restify.BadRequestError(err));
+                    });   
+}
+
+
+function getLuminosity(req, res, next) {
+
+    var options = getOptionsFromQueryString(req);
 
     storage.GetLuminosityForSensor(req.params.sensorID, options, 
                     function success(data) {
