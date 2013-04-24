@@ -32,11 +32,11 @@ function about(req, res, next) {
 function getTemperature(req, res, next) {
 
     // double check the sensor exist
-    var list = _.where(sensorList, { id: req.params.sensorID, type: 'temperature' });
+    //var list = _.where(sensorList, { id: req.params.sensorID, type: 'temperature' });
 
-    if (list.length == 0) {
-        return next(new restify.BadRequestError("no temperature sensor with id '" + req.params.sensorID + "'"));
-    }
+    //if (list.length == 0) {
+    //    return next(new restify.BadRequestError("no temperature sensor with id '" + req.params.sensorID + "'"));
+    //}
 
     var numberPoints = 9999999999;
     if (req.params.numberPoints) {
