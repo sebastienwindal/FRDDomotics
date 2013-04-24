@@ -196,13 +196,27 @@ function GetHumidityForSensor(sensorID, numberPoints, successFn, errorFn) {
 }
 
 
-function GetLuminosityForSensor(sensorID, numberPoints, successFn, errorFn) {
+function GetLuminosityForSensor(sensorID, options, successFn, errorFn) {
 
     var result = {};
 
-    LuminosityMeasurement   .findAll({  where: ['sensor_id=?', sensorID],
-                                        order: 'measurement_date DESC', 
-                                        limit: numberPoints})
+    var filter = {  where: ['sensor_id=?', sensorID],
+                    order: 'measurement_date DESC'
+                    };
+
+    if (options.numberPoints) {
+        filter.limit = options.numberPoints;
+    }
+    if (options.startDate && options.endDate) {
+        filter.where = ["sensor_id=? AND measurement_date >= ? AND measurement_date <= ?", sensorID, options.startDate, options.endDate];
+    }
+    if (option.timeSpan) {
+        var endDate = new Date();
+        var startDate = new Date(endDate.getTime() - option.timeSpan * 1000);
+        filter.where = ["sensor_id=? AND measurement_date >= ? AND measurement_date <= ?", sensorID, startDate, endDate];   
+    }
+
+    LuminosityMeasurement   .findAll(filter)
                             .success(function(lum) {
                                 result.sensorID = sensorID;
                                 result.luminosity = [];

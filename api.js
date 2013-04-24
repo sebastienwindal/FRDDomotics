@@ -73,11 +73,21 @@ function getHumidity(req, res, next) {
 function getLuminosity(req, res, next) {
 
     var numberPoints = 9999999999;
+    var options = {};
     if (req.params.numberPoints) {
-        numberPoints = req.params.numberPoints;
+        options.numberPoints = req.params.numberPoints;
+    }
+    if (req.params.startDate) {
+        option.startDate = req.params.startDate;
+    }
+    if (req.params.endDate) {
+        option.startDate = req.params.endDate;
+    }
+    if (req.params.timeSpan) {
+        option.timeSpan = req.params.timeSpan;
     }
 
-    storage.GetLuminosityForSensor(req.params.sensorID, numberPoints, 
+    storage.GetLuminosityForSensor(req.params.sensorID, options, 
                     function success(data) {
                         res.send(data);
                         next();
