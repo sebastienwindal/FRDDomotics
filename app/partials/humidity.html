@@ -5,7 +5,9 @@
 
 <time-span-picker time="timeInterval"></time-span-picker>
 
-<div id='chart' style="width:800px">
+<div ng-show="isLoading"><i class="icon-refresh icon-spin icon-4x"></i></div>
+
+<div id='chart' style="width:800px" ng-hide="isLoading">
   <svg style='height:500px'> </svg>
 </div>
 

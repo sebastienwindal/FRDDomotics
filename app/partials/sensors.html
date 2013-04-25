@@ -1,4 +1,6 @@
-<div >
+<div ng-show="isLoading"><i class="icon-refresh icon-spin icon-4x"></i></div>
+
+<div ng-hide="isLoading">
     <ul>
         <li ng-repeat="sensor in sensors">
             {{sensor.name}} - {{sensor.location}} 

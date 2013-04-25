@@ -3,6 +3,10 @@
 
 <div ng-controller="CurrentHumidityCtrl">
 
-<span class="current-value">{{currentValue}}</span><span class="current-value-unit">%</span>
+    <div ng-show="isLoading"><i class="icon-refresh icon-spin icon-4x"></i></div>
 
+    <div ng-hide="isLoading">
+        <span class="current-value">{{currentValue}}</span><span class="current-value-unit">%</span>
+    </div>
+    
 </div>

@@ -3,6 +3,10 @@
 
 <div ng-controller="CurrentTemperatureCtrl">
 
-    <span class="current-value">{{currentValue}}</span><span class="current-value-unit">C</span>
+    <div ng-show="isLoading"><i class="icon-refresh icon-spin icon-4x"></i></div>
+
+    <div ng-hide="isLoading">
+        <span class="current-value">{{currentValue}}</span><span class="current-value-unit">C</span>
+    </div>
 
 </div>
