@@ -1,12 +1,11 @@
 app.directive('timeSpanPicker', function() {
     return {
-
         name: 'TimeSpanPicker',
         scope: {
             time: "="
         },
         restrict: 'E',
-        template: '<ul><li ng-repeat="timeOption in timeOptions" ng-click="selectTimeOption(timeOption)">{{timeOption.display}}</li></ul>',
+        templateUrl: 'javascripts/Directives/timespanpickertemplate.html',
         link: function($scope, iElm, iAttrs, controller) {
             $scope.timeOptions = [
                                     {

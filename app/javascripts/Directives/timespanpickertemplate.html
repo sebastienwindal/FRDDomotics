@@ -1,0 +1,5 @@
+<div class="btn-group">
+    <div ng-repeat="timeOption in timeOptions" 
+         ng-class="{true:'btn btn-primary', false:'btn'}[timeOption==time]" 
+         ng-click="selectTimeOption(timeOption)">{{timeOption.display}}</div>
+</div>
