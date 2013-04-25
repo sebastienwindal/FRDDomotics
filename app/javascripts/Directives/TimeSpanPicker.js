@@ -33,6 +33,7 @@ app.directive('timeSpanPicker', function() {
                 $scope.time = option;
             };
 
+            $scope.selectTimeOption($scope.timeOptions[1]);
         }
     };
 });
