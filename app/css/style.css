@@ -6,3 +6,13 @@ body {
 a {
   color: #00B7FF;
 }
+
+.current-value {
+    font-size: 80px;
+}
+
+.current-value-unit {
+    font-size: 17px;
+    color: #555;
+    margin-left: 10px;
+}

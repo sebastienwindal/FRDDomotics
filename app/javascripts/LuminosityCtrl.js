@@ -1,14 +1,24 @@
 function LuminosityCtrl($scope, $routeParams, $http) {
- 
-    $http.defaults.headers.common['Authorization'] = 'Basic ' + Base64.encode('seb:password'); 
-    $http.get("/api/luminosity/" + $routeParams.sensorID + "?numberPoints=360", {})
-        .success(function(data, status, headers, config) {
-            $scope.data = data;
-            $scope.updateChart();
-        })
-        .error(function(data, status, headers, config) {
-            $scope.status = data;
-        });
+
+    $scope.timeInterval = null;
+
+    $scope.$watch("timeInterval", function(newValue, oldValue) {
+        if (newValue && newValue != oldValue) {
+            $scope.fetchData(newValue);
+        }
+    });
+
+    $scope.fetchData = function(option) { 
+        $http.defaults.headers.common['Authorization'] = 'Basic ' + Base64.encode('seb:password'); 
+        $http.get("/api/luminosity/" + $routeParams.sensorID + "?timeSpan=" + option.timeSpan, {})
+            .success(function(data, status, headers, config) {
+                $scope.data = data;
+                $scope.updateChart();
+            })
+            .error(function(data, status, headers, config) {
+                $scope.status = data;
+            });
+    };
 
     $scope.updateChart = function() {
         nv.addGraph(function() {

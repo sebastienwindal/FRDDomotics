@@ -4,7 +4,6 @@ function TemperatureCtrl($scope, $routeParams, $http) {
 
     $scope.$watch("timeInterval", function(newValue, oldValue) {
         if (newValue && newValue != oldValue) {
-            alert(newValue.timeSpan);
             $scope.fetchData(newValue);
         }
     });
