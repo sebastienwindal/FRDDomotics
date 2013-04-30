@@ -1,3 +1,115 @@
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost/FRDDomotics');
+var Schema = mongoose.Schema;
+
+var db = mongoose.connection;
+
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function callback () {
+  // yay!
+});
+
+var sensorSchema = new Schema({
+    sensor_id: Number,
+    name: String,
+    description: String,
+    location: String,
+    capabilities: [String]
+});
+
+sensorSchema.index({ sensor_id: 1 });
+sensorSchema.set('autoIndex', false);
+
+var Sensor = mongoose.model('Sensor', sensorSchema);
+
+// raw records
+var rawMeasurementSchema = new Schema({
+    sensor_id: Number,
+    measurement_type: String,
+    date: Date,
+    value: Number
+});
+
+rawMeasurementSchema.index({ sensor_id:1, measurement_type:1, date:1});
+rawMeasurementSchema.set('autoIndex', false);
+
+var RawMeasurement = mongoose.model('RawMeasurement', rawMeasurementSchema);
+
+// rollup records. We will have hourly records
+
+var rollupMeasurementSchema = new Schema({
+    sensor_id: Number,
+    measurement_type: String,
+    date: Date,
+    cumul_value: Number,
+    duration: Number,
+    min_value: Number,
+    max_value: Number,
+});
+
+rollupMeasurementSchema.index({sensor_id:1, measurement_type:1, date:1});
+rollupMeasurementSchema.set('autoIndex', false);
+
+var HourlyMeasurement = mongoose.model('HourlyMeasurement', rollupMeasurementSchema);
+
+
+function GetSensor2(sensorID, successFn, errorFn) {
+    Sensor.find({ sensor_id: sensorID}, function(err, sensor) {
+        if (err)
+            errorFn(err);
+        else
+            successFn(sensor);
+    });
+}
+
+function CreateSensor2(sensor, successFn, errorFn) {
+
+    if (!sensor.sensor_id)
+        errorFn("invalid sensor ID");
+    if (!sensor.capabilities || sensor.capabilities.length == 0)
+        errorFn("sensor must have at least one capability")
+
+    var newSensor = new Sensor({
+        sensor_id: sensor.sensor_id,
+        name: sensor.name,
+        description: sensor.description,
+        location: sensor.location,
+        capabilities: sensor.capabilities
+    });
+
+    newSensor.save(function(err, createdSensor) {
+        if (err)
+            errorFn(err);
+        else
+            successFn();
+    });
+}
+
+
+/*
+
+CreateSensor2({ 
+    sensor_id:2,
+    location: 'outside, above front door',
+    name: 'Sensor Front',
+    description: 'multisensor',
+    capabilities: ['temperature', 'humidity', 'luminosity']
+}, function success() {
+    console.log("sensor created");
+}, function error(errMessage) {
+    console.log(errMessage);
+} );
+
+GetSensor2(2, function success(sensor) {
+    console.log(sensor);
+}, function err(msg) {
+    console.log(msg);
+});
+
+*/
+// --
+
+
 var Sequelize = require("sequelize");
 
 var sequelize = new Sequelize(  'FRDDomotics', 
@@ -317,3 +429,6 @@ exports.GetLuminosityForSensor = GetLuminosityForSensor;
 exports.GetSensor = GetSensor;
 exports.GetAllSensors = GetAllSensors;
 exports.UpdateSensor = UpdateSensor;
+
+exports.GetSensor2 = GetSensor2;
+exports.CreateSensor2 = CreateSensor2;
