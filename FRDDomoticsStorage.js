@@ -45,6 +45,7 @@ var rollupMeasurementSchema = new Schema({
     duration: Number,
     min_value: Number,
     max_value: Number,
+    last_measurement_date: Date
 });
 
 rollupMeasurementSchema.index({sensor_id:1, measurement_type:1, date:1});
@@ -85,9 +86,198 @@ function CreateSensor2(sensor, successFn, errorFn) {
     });
 }
 
+function RemoveSensor2(sensorID, successFn, errorFn) {
+    Sensor.remove({ sensor_id: sensorID }, function (err) {
+        if (err) errorFn(err);
+        else
+            successFn();
+    });
+}
+
+function UpdateSensor2(sensor, successFn, errorFn) {
+    Sensor.update({ sensor_id: sensor.sensor_id }, 
+                { $set: sensor }, 
+                function(err) {
+                    if (err) errorFn(err);
+                    else
+                        successFn();
+                });
+}
+
+
+function SaveMeasurement2(measurementModel, successFn, errorFn) {
+
+    // start by adding a raw record...
+    console.log("measurementModel :" + measurementModel);
+    measurementModel.save(function(err, newMeasurement) {
+        if (err)
+            errorFn(err);
+        else
+            successFn(newMeasurement);
+    });
+
+    var filter = {
+        sensor_id: measurementModel.sensor_id,
+        measurement_type: measurementModel.measurement_type,
+        date: new Date( measurementModel.date.getFullYear(), 
+                        measurementModel.date.getMonth(),
+                        measurementModel.date.getDate(), 
+                        measurementModel.date.getHours(), 0, 0, 0)
+    };
+
+    var d = new Date();
+    d = new Date( d.getFullYear(), 
+                        d.getMonth(),
+                        d.getDate(), 
+                        d.getHours(), 0, 0, 0);
+
+    HourlyMeasurement.findOne(  filter, 
+                                function(err, hourly) {
+                                    if (err)
+                                        return;
+                                    if (!hourly) {
+                                        hourly = new HourlyMeasurement({
+                                            sensor_id: measurementModel.sensor_id,
+                                            measurement_type: measurementModel.measurement_type,
+                                            date: d,
+                                            cumul_value: 0,
+                                            min_value: 999999999,
+                                            max_value: -999999999,
+                                            duration: 0
+                                        });
+                                        hourly.save();
+                                    }
+
+                                    // update
+                                    hourly.min_value = Math.min(hourly.min_value, measurementModel.value);
+                                    hourly.max_value = Math.max(hourly.max_value, measurementModel.value);
+                                    var now = new Date();
+                                    var durationDelta;
+                                    if (hourly.last_measurement_date)
+                                        durationDelta = (now.getTime() - hourly.last_measurement_date.getTime())/1000;
+                                    else
+                                        durationDelta = (now.getTime() - d.getTime())/1000;
+                                    
+                                    hourly.duration += durationDelta;
+                                    hourly.cumul_value += measurementModel.value * durationDelta;
+                                    hourly.last_measurement_date = now;
+                                    hourly.save();
+                                });
+
+}
+
+function SaveTemperature2(sensorID, temperatureC, date, successFn, errorFn) {
+
+    if (!sensorID)
+        errorFn("invalid sensor ID");
+    if (!date)
+        errorFn("invalid date")
+
+    var measurement = new RawMeasurement({
+        sensor_id: sensorID,
+        measurement_type: "temperature",
+        value: temperatureC,
+        date: date
+    });
+
+    SaveMeasurement2(measurement, successFn, errorFn);
+}
+
+
+
+function GetLastTemperature2(sensorID, successFn, errorFn) {
+    if (!sensorID)
+        errorFn("invalid sensorID");
+
+    RawMeasurement.find({sensor_id: sensorID, measurement_type: "temperature"})
+                  .limit(1)
+                  .sort("-date")
+                  .exec(function(err, temperatureMeasurement) {
+                    if (err)
+                        errorFn(err);
+                    else
+                        successFn(temperatureMeasurement)
+                  });
+}
+
+function GetHourlyTemperatures2(sensorID, successFn, errorFn) {
+    if (!sensorID)
+        errorFn("invalid sensorID");
+
+    HourlyMeasurement.find( { sensor_id: sensorID, measurement_type: "temperature"})
+                     .sort("date")
+                     .exec(function(err, measurements) {
+                        if (err)
+                            errorFn(err);
+                        else 
+                            successFn(measurements);
+                     });
+}
+
+function GetRawMeasurementByDates2(sensorID, measurementType, startDate, endDate, successFn, errorFn) {
+    
+    var filter = {
+        measurement_type: measurementType,
+        sensor_id: sensorID,
+    };
+
+    if (startDate || endDate)
+
+    if (startDate && endDate)
+        filter.date = { $gte: startDate, $lte: endDate };
+    else if (startDate && !endDate)
+        filter.date = { $gte: startDate };
+    else if (!startDate && endDate)
+        filter.date = { $lte: endDate };
+
+    RawMeasurement  .find(filter)
+                    .exec(function(err, measurements) {
+                        if (err)
+                            errorFn(err);
+                        else
+                            successFn(measurements);
+                    });
+}
+
+function RemoveRawMeasurementOlderThan(sensorID, measurementType, date, successFn, errorFn) {
+    
+    var filter = {
+        measurement_type: measurementType,
+        sensor_id: sensorID
+    };
+
+    if (date) {
+        filter.date = { $lte: date };
+    }
+    RawMeasurement  .remove(filter)
+                    .exec(function(err) {
+                        if (err)
+                            errorFn(err);
+                        else
+                            successFn();
+                    });
+}
+
+function RemoveHourlyMeasurementOlderThan(sensorID, measurementType, date, successFn, errorFn) {
+    
+    var filter = {
+        measurement_type: measurementType,
+        sensor_id: sensorID
+    };
+
+    if (date) {
+        filter.date = { $lte: date };
+    }
+    HourlyMeasurement  .remove(filter)
+                        .exec(function(err) {
+                            if (err)
+                                errorFn(err);
+                            else
+                                successFn();
+                        });
+}
 
 /*
-
 CreateSensor2({ 
     sensor_id:2,
     location: 'outside, above front door',
@@ -98,15 +288,62 @@ CreateSensor2({
     console.log("sensor created");
 }, function error(errMessage) {
     console.log(errMessage);
-} );
+} ); //*/
 
-GetSensor2(2, function success(sensor) {
-    console.log(sensor);
-}, function err(msg) {
-    console.log(msg);
+//RemoveSensor2(2, function success() {}, function err(error) {console.log(error);});
+
+/*
+UpdateSensor2({ 
+    sensor_id:2,
+    location: 'outside, above front door',
+    name: 'Frontdoor multi-Sensor',
+    description: 'multisensor',
+    capabilities: ['temperature', 'humidity', 'luminosity']
+}, function success() {
+    console.log("sensor created");
+}, function error(errMessage) {
+    console.log(errMessage);
+} );
+*/
+
+//GetSensor2(2, function success(sensor) {
+//    console.log(sensor);
+//}, function err(msg) {
+//    console.log(msg);
+//});
+
+/*
+SaveTemperature2(2, 18.5, new Date(), function() {
+    console.log("temperature added");
+}, function(err) {
+    console.log(err);
+}); 
+//*/
+
+//GetLastTemperature2(2, function(m) { console.log(m); }, function(err) { console.log(err); });
+//*
+GetRawMeasurementByDates2(  2, 
+                            "temperature",
+                            null, 
+                            null,
+                            function(m) { console.log(m); }, function(err) { console.log(err); });
+
+//*/
+/*
+RemoveRawMeasurementOlderThan(  2,
+                                "temperature",
+                                null,
+                                function() { console.log("remove successful"); }, function(err) { console.log(err); });
+//*/
+
+GetHourlyTemperatures2(2, function success(m) {
+    console.log(m);
+}, function error(err) {
+    console.log(err);
 });
 
-*/
+//RemoveHourlyMeasurementOlderThan(2, "temperature", null, function() {}, function() {});
+
 // --
 
 
@@ -432,3 +669,6 @@ exports.UpdateSensor = UpdateSensor;
 
 exports.GetSensor2 = GetSensor2;
 exports.CreateSensor2 = CreateSensor2;
+exports.RemoveSensor2 = RemoveSensor2;
+exports.UpdateSensor2 = UpdateSensor2;
+exports.SaveTemperature2 = SaveTemperature2;
