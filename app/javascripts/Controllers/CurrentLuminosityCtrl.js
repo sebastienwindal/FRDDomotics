@@ -3,9 +3,9 @@ function CurrentLuminosityCtrl($scope, $routeParams, $http) {
     $scope.isLoading = true;
 
     $http.defaults.headers.common['Authorization'] = 'Basic ' + Base64.encode('seb:password'); 
-    $http.get("/api/luminosity/" + $routeParams.sensorID + "?numberPoints=1", {})
+    $http.get("/api/luminosity/raw/" + $routeParams.sensorID + "?numberPoints=1", {})
         .success(function(data, status, headers, config) {
-            $scope.currentValue = data.luminosity[0];
+            $scope.currentValue = data.values[0];
             $scope.isLoading = false;
         })
         .error(function(data, status, headers, config) {

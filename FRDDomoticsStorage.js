@@ -55,20 +55,42 @@ var HourlyMeasurement = mongoose.model('HourlyMeasurement', rollupMeasurementSch
 
 
 function GetSensor2(sensorID, successFn, errorFn) {
-    Sensor.find({ sensor_id: sensorID}, function(err, sensor) {
+    Sensor  .find({ sensor_id: sensorID})
+            .select({_id: 0, __v: 0})
+            .exec(function(err, sensor) {
         if (err)
             errorFn(err);
-        else
-            successFn(sensor);
+        else {
+            if (sensor.length == 1) {
+                successFn(sensor[0]);
+            } else {
+                successFn({}); 
+            }
+        }
     });
 }
-
+function GetAllSensors2(successFn, errorFn) {
+    Sensor  .find({ })
+            .sort('name')
+            .select({_id: 0, __v: 0})
+            .exec(function(err, sensor) {
+                if (err)
+                    errorFn(err);
+                else 
+                    successFn(sensor);
+            });
+}
 function CreateSensor2(sensor, successFn, errorFn) {
 
-    if (!sensor.sensor_id)
+    if (!sensor.sensor_id) {
         errorFn("invalid sensor ID");
-    if (!sensor.capabilities || sensor.capabilities.length == 0)
+        return;
+    }
+
+    if (!sensor.capabilities || sensor.capabilities.length == 0) {
         errorFn("sensor must have at least one capability")
+        return;
+    }
 
     var newSensor = new Sensor({
         sensor_id: sensor.sensor_id,
@@ -87,11 +109,14 @@ function CreateSensor2(sensor, successFn, errorFn) {
 }
 
 function RemoveSensor2(sensorID, successFn, errorFn) {
-    Sensor.remove({ sensor_id: sensorID }, function (err) {
-        if (err) errorFn(err);
-        else
-            successFn();
-    });
+
+    Sensor  .remove({ sensor_id: sensorID })
+                    .exec(function(err) {
+                        if (err)
+                            errorFn(err);
+                        else
+                            successFn();
+                    });
 }
 
 function UpdateSensor2(sensor, successFn, errorFn) {
@@ -105,10 +130,9 @@ function UpdateSensor2(sensor, successFn, errorFn) {
 }
 
 
-function SaveMeasurement2(measurementModel, successFn, errorFn) {
+function SaveMeasurement2(measurementModel, updateHourly, successFn, errorFn) {
 
     // start by adding a raw record...
-    console.log("measurementModel :" + measurementModel);
     measurementModel.save(function(err, newMeasurement) {
         if (err)
             errorFn(err);
@@ -116,25 +140,23 @@ function SaveMeasurement2(measurementModel, successFn, errorFn) {
             successFn(newMeasurement);
     });
 
+    if (!updateHourly)
+        return;
+
+    var d = GetHourBoundaryDate(measurementModel.date);
+
     var filter = {
         sensor_id: measurementModel.sensor_id,
         measurement_type: measurementModel.measurement_type,
-        date: new Date( measurementModel.date.getFullYear(), 
-                        measurementModel.date.getMonth(),
-                        measurementModel.date.getDate(), 
-                        measurementModel.date.getHours(), 0, 0, 0)
+        date: d
     };
-
-    var d = new Date();
-    d = new Date( d.getFullYear(), 
-                        d.getMonth(),
-                        d.getDate(), 
-                        d.getHours(), 0, 0, 0);
 
     HourlyMeasurement.findOne(  filter, 
                                 function(err, hourly) {
-                                    if (err)
+                                    if (err) {
+                                        console.log(err);
                                         return;
+                                    }
                                     if (!hourly) {
                                         hourly = new HourlyMeasurement({
                                             sensor_id: measurementModel.sensor_id,
@@ -151,22 +173,22 @@ function SaveMeasurement2(measurementModel, successFn, errorFn) {
                                     // update
                                     hourly.min_value = Math.min(hourly.min_value, measurementModel.value);
                                     hourly.max_value = Math.max(hourly.max_value, measurementModel.value);
-                                    var now = new Date();
+                                    
                                     var durationDelta;
                                     if (hourly.last_measurement_date)
-                                        durationDelta = (now.getTime() - hourly.last_measurement_date.getTime())/1000;
+                                        durationDelta = (measurementModel.date.getTime() - hourly.last_measurement_date.getTime())/1000;
                                     else
-                                        durationDelta = (now.getTime() - d.getTime())/1000;
+                                        durationDelta = (measurementModel.date.getTime() - d.getTime())/1000;
                                     
                                     hourly.duration += durationDelta;
                                     hourly.cumul_value += measurementModel.value * durationDelta;
-                                    hourly.last_measurement_date = now;
+                                    hourly.last_measurement_date = measurementModel.date;
                                     hourly.save();
                                 });
 
 }
 
-function SaveTemperature2(sensorID, temperatureC, date, successFn, errorFn) {
+function SaveTemperature2(sensorID, temperatureC, date, updateHourly, successFn, errorFn) {
 
     if (!sensorID)
         errorFn("invalid sensor ID");
@@ -180,9 +202,73 @@ function SaveTemperature2(sensorID, temperatureC, date, successFn, errorFn) {
         date: date
     });
 
-    SaveMeasurement2(measurement, successFn, errorFn);
+    SaveMeasurement2(measurement, updateHourly, successFn, errorFn);
 }
 
+function SaveLuminosity2(sensorID, lumen, date, updateHourly, successFn, errorFn) {
+
+    if (!sensorID) {
+        errorFn("invalid sensor ID");
+        return;
+    }
+    if (!date) {
+        errorFn("invalid date")
+        return;
+    }
+
+    var measurement = new RawMeasurement({
+        sensor_id: sensorID,
+        measurement_type: "luminosity",
+        value: lumen,
+        date: date
+    });
+
+    SaveMeasurement2(measurement, updateHourly, successFn, errorFn);
+}
+
+function SaveHumidity2(sensorID, humidity, date, updateHourly, successFn, errorFn) {
+
+    if (!sensorID) {
+        errorFn("invalid sensor ID");
+        return;
+    }
+    if (!date) {
+        errorFn("invalid date")
+        return;
+    }
+
+    var measurement = new RawMeasurement({
+        sensor_id: sensorID,
+        measurement_type: "humidity",
+        value: humidity,
+        date: date
+    });
+
+    SaveMeasurement2(measurement, updateHourly, successFn, errorFn);
+}
+
+function GetHourBoundaryDate(date) {
+    var d = new Date(   date.getFullYear(), 
+                        date.getMonth(),
+                        date.getDate(), 
+                        date.getHours(), 0, 0, 0);
+    return d;
+}
+
+function SaveHourlyMeasurement(sensorID, measurementType, measurementDate, cumulValue, minValue, maxValue, duration, lastMeasurementDate) {
+
+    hourly = new HourlyMeasurement({
+                                        sensor_id: sensorID,
+                                        measurement_type: measurementType,
+                                        date: GetHourBoundaryDate(measurementDate),
+                                        cumul_value: cumulValue,
+                                        min_value: minValue,
+                                        max_value: maxValue,
+                                        duration: duration,
+                                        last_measurement_date: lastMeasurementDate
+                                    });
+    hourly.save();
+}
 
 
 function GetLastTemperature2(sensorID, successFn, errorFn) {
@@ -214,30 +300,129 @@ function GetHourlyTemperatures2(sensorID, successFn, errorFn) {
                      });
 }
 
-function GetRawMeasurementByDates2(sensorID, measurementType, startDate, endDate, successFn, errorFn) {
-    
+function GetRawMeasurement(sensorID, measurementType, options, successFn, errorFn) {
+
     var filter = {
         measurement_type: measurementType,
         sensor_id: sensorID,
     };
 
-    if (startDate || endDate)
+    var limit = 0;
+    if (options) {
+        if (options.timeSpan) {
+            var startDate = new Date();
+            startDate = new Date(startDate.getTime() - options.timeSpan * 1000);
+            filter.date = { $gte: startDate };
+        } else if (options.startDate || options.endDate) {
+            if (options.startDate && options.endDate)
+                filter.date = { $gte: options.startDate, $lte: options.endDate };
+            else if (options.startDate && !options.endDate)
+                filter.date = { $gte: options.startDate };
+            else if (!startDate && endDate)
+                filter.date = { $lte: options.endDate };
+        }
+        if (options.numberPoints) {
+            limit = options.numberPoints;
+        }
+    }
 
-    if (startDate && endDate)
-        filter.date = { $gte: startDate, $lte: endDate };
-    else if (startDate && !endDate)
-        filter.date = { $gte: startDate };
-    else if (!startDate && endDate)
-        filter.date = { $lte: endDate };
+    var result = {};
 
     RawMeasurement  .find(filter)
-                    .exec(function(err, measurements) {
+                    .sort("-date")
+                    .limit(limit)
+                    .select({_id: 0, __v: 0})
+                    .exec(function(err, data) {
                         if (err)
                             errorFn(err);
-                        else
-                            successFn(measurements);
+                        else {
+                            result.sensor_id = sensorID;
+                            result.measurement_type = measurementType;
+                            result.values = [];
+                            result.date_offset = [];
+
+                            if (data.length > 0) {
+                                result.most_recent_measurement_date = data[0].date;
+                                result.oldest_measurement_date = data[data.length-1].date;
+
+                                var timeStamp = result.oldest_measurement_date.getTime()/1000;
+
+                                for (i in data) {
+                                    var point = data[i];
+                                    result.values.unshift(point.value);
+                                    var deltaTime = point.date.getTime()/1000 - timeStamp; 
+                                    result.date_offset.unshift(deltaTime);
+                                }
+                            }
+                            successFn(result);
+                        }
                     });
 }
+
+
+function GetHourlyMeasurement(sensorID, measurementType, options, successFn, errorFn) {
+
+    var filter = {
+        measurement_type: measurementType,
+        sensor_id: sensorID,
+    };
+    var limit = 0;
+    if (options) {
+        if (options.timeSpan) {
+            var startDate = new Date();
+            startDate = new Date(startDate.getTime() - options.timeSpan * 1000);
+            filter.date = { $gte: startDate };
+        } else if (options.startDate || options.endDate) {
+            if (options.startDate && options.endDate)
+                filter.date = { $gte: options.startDate, $lte: options.endDate };
+            else if (options.startDate && !options.endDate)
+                filter.date = { $gte: options.startDate };
+            else if (!startDate && endDate)
+                filter.date = { $lte: options.endDate };
+        }
+        if (options.numberPoints) {
+            limit = options.numberPoints;
+        }
+    }
+
+    var result = {};
+
+    HourlyMeasurement.find(filter)
+                    .sort("-date")
+                    .limit(limit)
+                    .select({_id: 0, __v: 0})
+                    .exec(function(err, data) {
+                        if (err)
+                            errorFn(err);
+                        else {
+                            result.sensor_id = sensorID;
+                            result.measurement_type = measurementType;
+                            result.hour_offset = [];
+
+                            result.mean_values = [];
+                            result.max_values = [];
+                            result.min_values = [];
+
+                            if (data.length > 0) {
+                                result.most_recent_measurement_date = data[0].date;
+                                result.oldest_measurement_date = data[data.length-1].date;
+
+                                var timeStamp = result.oldest_measurement_date.getTime()/1000;
+
+                                for (i in data) {
+                                    var point = data[i];
+                                    result.min_values.unshift(point.min_value);
+                                    result.max_values.unshift(point.max_value);
+                                    result.mean_values.unshift(point.cumul_value / point.duration);
+                                    var deltaTime = point.date.getTime()/1000 - timeStamp; 
+                                    result.hour_offset.unshift(deltaTime/3600);
+                                }   
+                            }
+                            successFn(result);
+                        }
+                    });
+}
+
 
 function RemoveRawMeasurementOlderThan(sensorID, measurementType, date, successFn, errorFn) {
     
@@ -249,6 +434,7 @@ function RemoveRawMeasurementOlderThan(sensorID, measurementType, date, successF
     if (date) {
         filter.date = { $lte: date };
     }
+
     RawMeasurement  .remove(filter)
                     .exec(function(err) {
                         if (err)
@@ -313,7 +499,7 @@ UpdateSensor2({
 //});
 
 /*
-SaveTemperature2(2, 18.5, new Date(), function() {
+SaveTemperature2(2, 18.5, new Date(), true, function() {
     console.log("temperature added");
 }, function(err) {
     console.log(err);
@@ -321,7 +507,7 @@ SaveTemperature2(2, 18.5, new Date(), function() {
 //*/
 
 //GetLastTemperature2(2, function(m) { console.log(m); }, function(err) { console.log(err); });
-//*
+/*
 GetRawMeasurementByDates2(  2, 
                             "temperature",
                             null, 
@@ -335,13 +521,13 @@ RemoveRawMeasurementOlderThan(  2,
                                 null,
                                 function() { console.log("remove successful"); }, function(err) { console.log(err); });
 //*/
-
+/*
 GetHourlyTemperatures2(2, function success(m) {
     console.log(m);
 }, function error(err) {
     console.log(err);
 });
-
+/*/
 //RemoveHourlyMeasurementOlderThan(2, "temperature", null, function() {}, function() {});
 
 // --
@@ -401,7 +587,7 @@ var LuminosityMeasurement = sequelize.define(   'Luminosity',
                                                 );
 
 
-var Sensor = sequelize.define(  'Sensor',
+var SensorTable = sequelize.define(  'Sensor',
                                 {
                                     row_id: {   type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
                                     sensor_id: Sequelize.INTEGER,
@@ -424,7 +610,7 @@ var SensorType = sequelize.define(  'SensorType',
                                     }
                                     );
 
-Sensor.hasMany(SensorType, {as: 'sensorTypes'});
+SensorTable.hasMany(SensorType, {as: 'sensorTypes'});
 
 
 function SaveTemperature(sensorID, date, temperature, successFn, errorFn) {
@@ -501,9 +687,11 @@ function GetLastTemperatureForSensor(sensorID, successFn, errorFn) {
     GetTemperatureForSensor(sensorID, 1, successFn, errorFn);
 }
 
-function GetTemperaturesForSensor(sensorID, options, successFn, errorFn) {
+function GetTemperatureForSensor(sensorID, options, successFn, errorFn) {
 
     var result = {};
+
+    //options.numberPoints = 5
 
     var filter = FilterFromOptions(options, sensorID);
 
@@ -512,19 +700,22 @@ function GetTemperaturesForSensor(sensorID, options, successFn, errorFn) {
                                 result.sensorID = sensorID;
                                 result.temperatures = [];
                                 result.date_offset = [];
+                                temp.reverse();
 
                                 if (temp.length > 0) {
-                                    result.most_recent_measurement_date = temp[0].selectedValues.measurement_date;
-				    
-				                    var lastTimestamp = result.most_recent_measurement_date.getTime()/1000;
+                                    result.oldest_measurement_date = temp[0].selectedValues.measurement_date;
+				                    result.most_recent_measurement_date = temp[temp.length-1].selectedValues.measurement_date;
+
+				                    var lastTimestamp = result.oldest_measurement_date.getTime()/1000;
 
                                     for (i in temp) {
                                         var point = temp[i].selectedValues;
                                         result.temperatures.push(point.value);
-					                    var deltaTime = lastTimestamp - point.measurement_date.getTime()/1000; 
+					                    var deltaTime = point.measurement_date.getTime()/1000 - lastTimestamp; 
                                         result.date_offset.push(deltaTime);
                                     }
                                 }
+                                //console.log(result);
                                 successFn(result);
                             })
                             .error(function(err) {
@@ -533,27 +724,32 @@ function GetTemperaturesForSensor(sensorID, options, successFn, errorFn) {
 }
 
 
+
 function GetHumidityForSensor(sensorID, options, successFn, errorFn) {
 
     var result = {};
+
+    //options.numberPoints = 5;
 
     var filter = FilterFromOptions(options, sensorID);
 
     HumidityMeasurement .findAll(filter)
                         .success(function(hum) {
+                            hum.reverse();
                             result.sensorID = sensorID;
                             result.humidity = [];
                             result.date_offset = [];
 
                             if (hum.length > 0) {
-                                result.most_recent_measurement_date = hum[0].selectedValues.measurement_date;
-                
-                                var lastTimestamp = result.most_recent_measurement_date.getTime()/1000;
+                                    result.oldest_measurement_date = hum[0].selectedValues.measurement_date;
+                                    result.most_recent_measurement_date = hum[hum.length-1].selectedValues.measurement_date;
+
+                                var lastTimestamp = result.oldest_measurement_date.getTime()/1000;
 
                                 for (i in hum) {
                                     var point = hum[i].selectedValues;
                                     result.humidity.push(point.value);
-                                    var deltaTime = lastTimestamp - point.measurement_date.getTime()/1000; 
+                                    var deltaTime = point.measurement_date.getTime()/1000 - lastTimestamp; 
                                     result.date_offset.push(deltaTime);
                                 }
                             }
@@ -570,23 +766,26 @@ function GetLuminosityForSensor(sensorID, options, successFn, errorFn) {
 
     var result = {};
 
+    //options.numberPoints = 5;
+
     var filter = FilterFromOptions(options, sensorID);
 
     LuminosityMeasurement   .findAll(filter)
                             .success(function(lum) {
+                                lum.reverse();
                                 result.sensorID = sensorID;
                                 result.luminosity = [];
                                 result.date_offset = [];
 
                                 if (lum.length > 0) {
-                                    result.most_recent_measurement_date = lum[0].selectedValues.measurement_date;
-                    
-                                    var lastTimestamp = result.most_recent_measurement_date.getTime()/1000;
+                                    result.oldest_measurement_date = lum[0].selectedValues.measurement_date;
+                                    result.most_recent_measurement_date = lum[lum.length-1].selectedValues.measurement_date;
+                                    var lastTimestamp = result.oldest_measurement_date.getTime()/1000;
 
                                     for (i in lum) {
                                         var point = lum[i].selectedValues;
                                         result.luminosity.push(point.value);
-                                        var deltaTime = lastTimestamp - point.measurement_date.getTime()/1000; 
+                                        var deltaTime = point.measurement_date.getTime()/1000 - lastTimestamp; 
                                         result.date_offset.push(deltaTime);
                                     }
                                 }
@@ -601,7 +800,7 @@ function GetAllSensors(successFn, errorFn) {
 
     var result = [];
 
-    Sensor  .findAll()
+    SensorTable  .findAll()
             .success(function(sensors) {
                 var result = [];
                 for (var i in sensors) {
@@ -623,7 +822,7 @@ function GetAllSensors(successFn, errorFn) {
 function GetSensor(sensorID, successFn, errorFn) {
     var result = {};
 
-    Sensor  .findAll({  where: ['sensor_id=?', sensorID],
+    SensorTable  .findAll({  where: ['sensor_id=?', sensorID],
                         limit: 1 })
             .success(function(sensors) {
                 
@@ -645,7 +844,7 @@ function GetSensor(sensorID, successFn, errorFn) {
 
 function UpdateSensor(sensorID, data, successFn, errorFn) {
     
-    Sensor.find({  where: ['sensor_id=?', sensorID] }).success(function(sensor) {
+    SensorTable.find({  where: ['sensor_id=?', sensorID] }).success(function(sensor) {
         if (sensor) {
             sensor.name = data.name;
             sensor.location = data.location;
@@ -660,7 +859,7 @@ exports.SaveLuminosity = SaveLuminosity;
 exports.SaveHumidity = SaveHumidity;
 exports.SaveTemperature = SaveTemperature;
 exports.GetLastTemperatureForSensor = GetLastTemperatureForSensor;
-exports.GetTemperaturesForSensor = GetTemperaturesForSensor;
+exports.GetTemperatureForSensor = GetTemperatureForSensor;
 exports.GetHumidityForSensor = GetHumidityForSensor;
 exports.GetLuminosityForSensor = GetLuminosityForSensor;
 exports.GetSensor = GetSensor;
@@ -668,7 +867,19 @@ exports.GetAllSensors = GetAllSensors;
 exports.UpdateSensor = UpdateSensor;
 
 exports.GetSensor2 = GetSensor2;
+exports.GetAllSensors2 = GetAllSensors2;
 exports.CreateSensor2 = CreateSensor2;
 exports.RemoveSensor2 = RemoveSensor2;
 exports.UpdateSensor2 = UpdateSensor2;
 exports.SaveTemperature2 = SaveTemperature2;
+exports.SaveLuminosity2 = SaveLuminosity2;
+exports.SaveHumidity2 = SaveHumidity2;
+exports.GetRawMeasurement = GetRawMeasurement;
+exports.GetHourlyMeasurement = GetHourlyMeasurement;
+
+exports.RemoveHourlyMeasurementOlderThan = RemoveHourlyMeasurementOlderThan;
+exports.RemoveRawMeasurementOlderThan = RemoveRawMeasurementOlderThan;
+exports.SaveHourlyMeasurement = SaveHourlyMeasurement;
+
+
+exports.GetHourBoundaryDate = GetHourBoundaryDate;

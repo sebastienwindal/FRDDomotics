@@ -4,16 +4,23 @@ function LuminosityCtrl($scope, $routeParams, $http) {
 
     $scope.$watch("timeInterval", function(newValue, oldValue) {
         if (newValue && newValue != oldValue) {
+            $scope.datasetType = newValue.type;
             $scope.fetchData(newValue);
         }
     });
 
-    $scope.fetchData = function(option) { 
+    $scope.fetchData = function(timeOption) { 
 
         $scope.isLoading = true;
-        
         $http.defaults.headers.common['Authorization'] = 'Basic ' + Base64.encode('seb:password'); 
-        $http.get("/api/luminosity/" + $routeParams.sensorID + "?timeSpan=" + option.timeSpan, {})
+
+        var url = "/api/luminosity/" + timeOption.type + "/" + $routeParams.sensorID;
+        if (timeOption.timeSpan)
+            url = url + "?timeSpan=" + timeOption.timeSpan;
+        if (timeOption.daySpan)
+            url = url + "?timeSpan=" + timeOption.daySpan * 24 * 3600;
+
+        $http.get(url, {})
             .success(function(data, status, headers, config) {
                 $scope.data = data;
                 $scope.updateChart();
@@ -48,9 +55,23 @@ function LuminosityCtrl($scope, $routeParams, $http) {
 
     $scope.sinAndCos = function() {
         var sin = [];
-        var now = new Date($scope.data.most_recent_measurement_date).getTime();
-        for (var i in $scope.data.luminosity) {
-            sin.push({x: now-$scope.data.date_offset[i]*1000, y: $scope.data.luminosity[i]});
+        if ($scope.datasetType == 'raw') {
+            for (var i in $scope.data.values) {
+            
+                sin.push({
+                            x: $scope.data.date_offset[i]*1000, 
+                            y: $scope.data.values[i]
+                        });
+            }
+        } else {
+            var d = new Date($scope.data.oldest_measurement_date);
+
+            for (var i in $scope.data.mean_values) {
+                sin.push({
+                                x: new Date(d.getTime() + $scope.data.hour_offset[i] + 3600), 
+                                y: $scope.data.mean_values[i] 
+                            });
+            }
         }
 
         return [

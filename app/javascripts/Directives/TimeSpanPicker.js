@@ -10,22 +10,48 @@ app.directive('timeSpanPicker', function() {
             $scope.timeOptions = [
                                     {
                                         display: "last hour",
-                                        timeSpan: 60 * 60
+                                        timeSpan: 60 * 60,
+                                        type: "raw"
                                     },
                                     { 
                                         display: "last 4 hours",
-                                        timeSpan: 4 * 60 * 60
+                                        timeSpan: 4 * 60 * 60,
+                                        type: "raw"
                                     },
                                     {
                                         display: "last 12 hours",
-                                        timeSpan: 12 * 60 * 60
+                                        timeSpan: 12 * 60 * 60,
+                                        type: "raw"
                                     },
                                     {
                                         display: "last 24 hours",
-                                        timeSpan: 24 * 60 * 60
+                                        timeSpan: 24 * 60 * 60,
+                                        type: "raw"
                                     },
                                     {
-                                        display: "today"                                        
+                                        display: "two days",
+                                        type: 'hourly',
+                                        daySpan: 2
+                                    },
+                                    {
+                                        display: "weekly",
+                                        type: 'hourly',
+                                        daySpan: 7
+                                    },
+                                    {
+                                        display: "biweekly",
+                                        type: 'hourly',
+                                        daySpan: 14
+                                    },
+                                    {
+                                        display: "monthly",
+                                        type: 'hourly',
+                                        daySpan: 30
+                                    },
+                                    {
+                                        display: "all",
+                                        type: 'hourly',
+                                        daySpan: 99999999
                                     }
                                     ];
 

@@ -8,12 +8,21 @@ function TemperatureCtrl($scope, $routeParams, $http) {
         }
     });
 
+    $scope.datasetType = "raw";
+
     $scope.fetchData = function(timeOption) {
         
         $scope.isLoading = true;
 
         $http.defaults.headers.common['Authorization'] = 'Basic ' + Base64.encode('seb:password'); 
-        $http.get("/api/temperature/" + $routeParams.sensorID + "?timeSpan=" + timeOption.timeSpan, {})
+        $scope.datasetType = timeOption.type;
+        var url = "/api/temperature/" + timeOption.type + "/" + $routeParams.sensorID;
+        if (timeOption.timeSpan)
+            url = url + "?timeSpan=" + timeOption.timeSpan;
+        if (timeOption.daySpan)
+            url = url + "?timeSpan=" + timeOption.daySpan * 24 * 3600;
+
+        $http.get(url, {})
             .success(function(data, status, headers, config) {
                 $scope.data = data;
                 $scope.updateChart();
@@ -49,9 +58,22 @@ function TemperatureCtrl($scope, $routeParams, $http) {
 
     $scope.sinAndCos = function() {
         var sin = [];
-        var now = new Date($scope.data.most_recent_measurement_date).getTime();
-        for (var i in $scope.data.temperatures) {
-            sin.push({x: now-$scope.data.date_offset[i]*1000, y: $scope.data.temperatures[i]});
+        
+        if ($scope.datasetType == 'raw') {
+            for (var i in $scope.data.values) {
+            
+                sin.push({
+                            x: $scope.data.date_offset[i]*1000, 
+                            y: $scope.data.values[i]
+                        });
+            }
+        } else {
+            for (var i in $scope.data.mean_values) {
+                sin.push({
+                                x: $scope.data.hour_offset[i], 
+                                y: $scope.data.mean_values[i] 
+                            });
+            }
         }
 
         return [

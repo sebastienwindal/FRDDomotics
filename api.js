@@ -49,53 +49,109 @@ function getOptionsFromQueryString(req) {
     return options;
 }
 
+
+// complete
 function getTemperature(req, res, next) {
 
     var options = getOptionsFromQueryString(req);
 
-    storage.GetTemperaturesForSensor(req.params.sensorID, options, 
-					function success(data) {
-						res.send(data);
-    						next();
-					},
-					function error(err) {
-						return next(new restify.BadRequestError(err));
-					});
+    storage.GetRawMeasurement(  req.params.sensorID, 
+                                "temperature", 
+                                options,
+                                function success(data) {
+                                    res.send(data);
+                                    next();
+                                },
+                                function error(err) {
+                                    return next(new restify.BadRequestError(err));
+                                });
 }
 
+function getHourlyTemperature(req, res, next) {
+    var options = getOptionsFromQueryString(req);
+
+    storage.GetHourlyMeasurement(  req.params.sensorID, 
+                                    "temperature", 
+                                    options,
+                                    function success(data) {
+                                        res.send(data);
+                                        next();
+                                    },
+                                    function error(err) {
+                                        return next(new restify.BadRequestError(err));
+                                    });
+}
+
+function getHourlyHumidity(req, res, next) {
+    var options = getOptionsFromQueryString(req);
+
+    storage.GetHourlyMeasurement(  req.params.sensorID, 
+                                    "humidity", 
+                                    options,
+                                    function success(data) {
+                                        res.send(data);
+                                        next();
+                                    },
+                                    function error(err) {
+                                        return next(new restify.BadRequestError(err));
+                                    });
+}
+
+function getHourlyLuminosity(req, res, next) {
+    var options = getOptionsFromQueryString(req);
+
+    storage.GetHourlyMeasurement(  req.params.sensorID, 
+                                    "luminosity", 
+                                    options,
+                                    function success(data) {
+                                        res.send(data);
+                                        next();
+                                    },
+                                    function error(err) {
+                                        return next(new restify.BadRequestError(err));
+                                    });
+}
+
+
+
+// complete
 function getHumidity(req, res, next) {
 
     var options = getOptionsFromQueryString(req);
 
-    storage.GetHumidityForSensor(req.params.sensorID, options, 
-                    function success(data) {
-                        res.send(data);
-                            next();
-                    },
-                    function error(err) {
-                        return next(new restify.BadRequestError(err));
-                    });   
+    storage.GetRawMeasurement(  req.params.sensorID, 
+                                "humidity", 
+                                options,
+                                function success(data) {
+                                    res.send(data);
+                                    next();
+                                },
+                                function error(err) {
+                                    return next(new restify.BadRequestError(err));
+                                });
 }
 
-
+// complete
 function getLuminosity(req, res, next) {
 
     var options = getOptionsFromQueryString(req);
 
-    storage.GetLuminosityForSensor(req.params.sensorID, options, 
-                    function success(data) {
-                        res.send(data);
-                        next();
-                    },
-                    function error(err) {
-                        return next(new restify.BadRequestError(err));
-                    });   
+    storage.GetRawMeasurement(  req.params.sensorID, 
+                                "luminosity", 
+                                options,
+                                function success(data) {
+                                    res.send(data);
+                                    next();
+                                },
+                                function error(err) {
+                                    return next(new restify.BadRequestError(err));
+                                });
 }
 
-
+// complete
 function getAllSensors(req, res, next) {
     
-    storage.GetAllSensors(function success(data) {
+    storage.GetAllSensors2(function success(data) {
         res.send(data);
         next();
     },
@@ -104,8 +160,9 @@ function getAllSensors(req, res, next) {
     });   
 }
 
+// complete
 function getSensor(req, res, next) {
-    storage.GetSensor(  req.params.sensorID,
+    storage.GetSensor2(  req.params.sensorID,
                         function success(data) {
                             res.send(data);
                             next();
@@ -116,9 +173,10 @@ function getSensor(req, res, next) {
 
 }
 
+
 function updateSensor(req, res, next) {
 
-    storage.UpdateSensor(   req.params.sensorID,
+    storage.UpdateSensor2(  req.params.sensorID,
                             req.body,
                             function success(data) {
                                 res.send(data);
@@ -176,9 +234,14 @@ server.get('/sensors', getAllSensors);
 server.get('/sensor/:sensorID', getSensor);
 server.put('/sensor/:sensorID', updateSensor);
 
-server.get('/temperature/:sensorID', getTemperature);
-server.get('/humidity/:sensorID', getHumidity);
-server.get('/luminosity/:sensorID', getLuminosity);
+server.get('/temperature/raw/:sensorID', getTemperature);
+server.get('/humidity/raw/:sensorID', getHumidity);
+server.get('/luminosity/raw/:sensorID', getLuminosity);
+
+server.get('/temperature/hourly/:sensorID', getHourlyTemperature);
+server.get('/humidity/hourly/:sensorID', getHourlyHumidity);
+server.get('/luminosity/hourly/:sensorID', getHourlyLuminosity);
+
 
 server.get(/./, wrongRoute);
 
