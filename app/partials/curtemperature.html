@@ -6,7 +6,10 @@
     <div ng-show="isLoading"><i class="icon-refresh icon-spin icon-4x"></i></div>
 
     <div ng-hide="isLoading">
-        <span class="current-value">{{currentValue}}</span><span class="current-value-unit">C</span>
+        <div>
+            <span class="current-value">{{currentValue}}</span><span class="current-value-unit">C</span>
+        </div>
+        <div class="measurement-date">measured {{date}}</div>
     </div>
 
 </div>

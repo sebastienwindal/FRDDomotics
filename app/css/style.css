@@ -20,3 +20,9 @@ a {
 .chart-loading {
     margin: 300px 0px 0px 360px;
 }
+
+.measurement-date {
+    margin: 10px 0px 0px 10px;
+    font-size: 0.8em;
+    color: #444;
+}
