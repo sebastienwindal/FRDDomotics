@@ -72,9 +72,10 @@ function handleAnswer(error, response, body) {
                 if (data.sensorTypeString) {
                     switch (data.sensorTypeString.value) {
                         case 'Temperature':
-                            storage.SaveTemperature(sensorID,
-                                                    lastMeasurementDate,
+                            storage.SaveTemperature2(sensorID,
                                                     data.val.value,
+                                                    lastMeasurementDate,
+                                                    true,
                                                     function success() {
                                                         console.log('temperature saved ' + data.val.value);
                                                     },
@@ -83,9 +84,10 @@ function handleAnswer(error, response, body) {
                                                     });
                             break;
                         case 'Luminiscence':
-                            storage.SaveLuminosity( sensorID,
-                                                    lastMeasurementDate,
+                            storage.SaveLuminosity2( sensorID,
                                                     data.val.value,
+                                                    lastMeasurementDate,
+                                                    true,
                                                     function success() {
                                                         console.log('luminosity saved ' + data.val.value);
                                                     },
@@ -94,9 +96,10 @@ function handleAnswer(error, response, body) {
                                                     });
                             break;
                         case 'Humidity':
-                            storage.SaveHumidity(   sensorID,
-                                                    lastMeasurementDate,
+                            storage.SaveHumidity2(   sensorID,
                                                     data.val.value,
+                                                    lastMeasurementDate,
+                                                    true,
                                                     function success() {
                                                         console.log('humidity saved ' + data.val.value);
                                                     },
