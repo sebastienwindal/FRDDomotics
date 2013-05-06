@@ -11,5 +11,8 @@ app.config(['$routeProvider', function($routeProvider) {
       when('/humidity/:sensorID', {templateUrl: 'partials/curhumidity.html', controller: CurrentHumidityCtrl }).
 
       when('/sensors', {templateUrl: 'partials/sensors.html', controller: SensorsCtrl }).
+
+      when('/calendar/:sensorID', { templateUrl: 'partials/sensorcalendar.html' }).
+
       otherwise({redirectTo: '/404'});
 }]);
