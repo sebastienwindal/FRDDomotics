@@ -51,7 +51,7 @@ app.directive('timeSpanPicker', function() {
                                     {
                                         display: "all",
                                         type: 'hourly',
-                                        daySpan: 99999999
+                                        daySpan: 9999
                                     }
                                     ];
 
