@@ -1,11 +1,35 @@
+<style>
+.calendar-list ul {
+    list-style: none;
+    margin: 5px 20px;
+}
+.min-rect, .max-rect, .avg-rect {
+    height: 10px;
+    border: 1px solid rgba(0,0,0,0.3);
+}
+.value-container {
+    width: 200px;
+}
+.min-rect {
+    background-color: blue;
+}
+.max-rect {
+    background-color: red;
+}
+.avg-rect {
+    background-color: green;
+}
+</style>
+
 <div ng-controller="SensorCalendarCtrl">
 
-    <ul>
+    <ul class="calendar-list">
         <li ng-repeat="day in days">
             <div>{{day.date}}</div>
-            <div>{{day.min}}</div>
-            <div>{{day.avg}}</div>
-            <div>{{day.max}}</div>
+            <div><span class="value-container"><span class="min-rect" style="width: {{day.min}}px"></span></span>{{day.min}}</div>
+            <div><span class="value-container"><span class="avg-rect" style="width: {{day.avg}}px"></span></span>{{day.avg}}</div>
+            <div><span class="value-container"><span class="max-rect" style="width: {{day.max}}px"></span></span>{{day.max}}</div>
         </li>
+    </ul>
 
 </div>
