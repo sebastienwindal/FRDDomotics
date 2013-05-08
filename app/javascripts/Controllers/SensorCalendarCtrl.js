@@ -12,26 +12,28 @@ function SensorCalendarCtrl($scope, $routeParams, $http) {
         .success(function(data, status, headers, config) {
 
             var dayStats = {};
-
-            for (index in data.values) {
-                
+            var m = moment(data.oldest_measurement_date); 
+            for (index in data.min_values) {
+                var m2 = moment(m);
+                m2.add('hours', data.hour_offset[index]);
+                m2.startOf('day'); 
+                if (!dayStats[m2]) {
+                    dayStats[m2] = {    min: data.min_values[index],
+                                        max: data.max_values[index]
+                                    };
+                } else {
+                    dayStats[m2].min = Math.min(dayStats[m2].min, data.min_values[index]);
+                    dayStats[m2].max = Math.max(dayStats[m2].max, data.max_values[index]);
+                }
             }
-
 
             $scope.isLoading = false;
             
-            $scope.days = [ {
-                min: 10, 
-                max: 15,
-                avg: 12.5,
-                date: new Date()
-            },
-            {
-                min: 11, 
-                max: 19,
-                avg: 15,
-                date: new Date()
-            }]
+            $scope.days = [];
+            for (key in dayStats) {
+                var val = dayStats[key];
+                $scope.days.push({ date: key, min: val.min, max: val.max });
+            }
         })
         .error(function(data, status, headers, config) {
             $scope.isLoading = false;

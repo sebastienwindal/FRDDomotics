@@ -1,14 +1,16 @@
 <style>
-.calendar-list ul {
+.calendar-list li {
     list-style: none;
     margin: 5px 20px;
 }
 .min-rect, .max-rect, .avg-rect {
     height: 10px;
     border: 1px solid rgba(0,0,0,0.3);
+    display: inline-block;
 }
 .value-container {
     width: 200px;
+    display: inline-block;
 }
 .min-rect {
     background-color: blue;
@@ -26,9 +28,8 @@
     <ul class="calendar-list">
         <li ng-repeat="day in days">
             <div>{{day.date}}</div>
-            <div><span class="value-container"><span class="min-rect" style="width: {{day.min}}px"></span></span>{{day.min}}</div>
-            <div><span class="value-container"><span class="avg-rect" style="width: {{day.avg}}px"></span></span>{{day.avg}}</div>
-            <div><span class="value-container"><span class="max-rect" style="width: {{day.max}}px"></span></span>{{day.max}}</div>
+            <div><div class="value-container"><div class="min-rect" style="width:{{day.min * 5}}px"></div></div>{{day.min}}</div>
+            <div><span class="value-container"><span class="max-rect" style="width: {{day.max * 5}}px"></span></span>{{day.max}}</div>
         </li>
     </ul>
 
