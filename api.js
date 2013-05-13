@@ -29,6 +29,16 @@ function about(req, res, next) {
     return next(new restify.BadRequestError("unknown argument '" + req.params.option + "'"));
 }
 
+function status(req, res, next) {
+    storage.GetStats(function success(stats) {
+	res.send({ stats: stats });
+	return next();	
+    }, function error(err) {
+	res.send({error: err});
+	return next();
+    });
+}
+
 
 function getOptionsFromQueryString(req) {
     
@@ -242,6 +252,7 @@ server.get('/temperature/hourly/:sensorID', getHourlyTemperature);
 server.get('/humidity/hourly/:sensorID', getHourlyHumidity);
 server.get('/luminosity/hourly/:sensorID', getHourlyLuminosity);
 
+server.get('/status', status);
 
 server.get(/./, wrongRoute);
 

@@ -247,6 +247,17 @@ function SaveHumidity2(sensorID, humidity, date, updateHourly, successFn, errorF
     SaveMeasurement2(measurement, updateHourly, successFn, errorFn);
 }
 
+function GetStats(successFn, errorFn) {
+    HourlyMeasurement.db.db.executeDbCommand({collStats: "collection"}, function(err, res) {
+	if (err)
+		errorFn(err);
+	else
+		successFn(res);
+    });
+
+}
+
+
 function GetHourBoundaryDate(date) {
     var d = new Date(   date.getFullYear(), 
                         date.getMonth(),
@@ -881,5 +892,6 @@ exports.RemoveHourlyMeasurementOlderThan = RemoveHourlyMeasurementOlderThan;
 exports.RemoveRawMeasurementOlderThan = RemoveRawMeasurementOlderThan;
 exports.SaveHourlyMeasurement = SaveHourlyMeasurement;
 
+exports.GetStats = GetStats;
 
 exports.GetHourBoundaryDate = GetHourBoundaryDate;
