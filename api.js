@@ -5,6 +5,7 @@ var crypto = require('crypto');
 var path = require('path');
 var storage = require('./FRDDomoticsStorage.js');
 
+
 function about(req, res, next) {
 
     var data = {    name: server.name, 
@@ -28,6 +29,7 @@ function about(req, res, next) {
 
     return next(new restify.BadRequestError("unknown argument '" + req.params.option + "'"));
 }
+
 
 function status(req, res, next) {
     storage.GetStats(function success(stats) {
@@ -77,6 +79,7 @@ function getTemperature(req, res, next) {
                                 });
 }
 
+
 function getLastTemperature(req, res, next)
 {
     storage.GetLastTemperature2(req.params.sensorID, 
@@ -88,6 +91,7 @@ function getLastTemperature(req, res, next)
                                     return next(new restify.BadRequestError(err));
                                 });
 }
+
 
 function getHourlyTemperature(req, res, next) {
     var options = getOptionsFromQueryString(req);
@@ -104,6 +108,7 @@ function getHourlyTemperature(req, res, next) {
                                     });
 }
 
+
 function getHourlyHumidity(req, res, next) {
     var options = getOptionsFromQueryString(req);
 
@@ -119,6 +124,7 @@ function getHourlyHumidity(req, res, next) {
                                     });
 }
 
+
 function getHourlyLuminosity(req, res, next) {
     var options = getOptionsFromQueryString(req);
 
@@ -133,8 +139,6 @@ function getHourlyLuminosity(req, res, next) {
                                         return next(new restify.BadRequestError(err));
                                     });
 }
-
-
 
 // complete
 function getHumidity(req, res, next) {
