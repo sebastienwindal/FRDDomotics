@@ -1,6 +1,8 @@
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/FRDDomotics');
 var Schema = mongoose.Schema;
+var async = require('async');
+var moment = require('moment');
 
 var db = mongoose.connection;
 
@@ -286,6 +288,69 @@ function GetLastTemperature2(sensorID, successFn, errorFn) {
     if (!sensorID)
         errorFn("invalid sensorID");
 
+    async.parallel(
+        {
+            lastOne: function(callback){
+                RawMeasurement.find({   sensor_id: sensorID, 
+                                        measurement_type: "temperature"
+                                    })
+                  .limit(1)
+                  .sort("-date")
+                  .exec(callback);
+            },
+            anHourAgo: function(callback){
+                var anHourAgoDate = moment().subtract('hours', 1);
+                RawMeasurement.find({   sensor_id: sensorID, 
+                                        measurement_type: "temperature"
+                                    })
+                  .where('date').lt(anHourAgoDate)
+                  .limit(1)
+                  .sort("-date")
+                  .exec(callback);
+            },
+            aDayAgo: function(callback){
+                var aDayAgoDate = moment().subtract('days', 1);
+                RawMeasurement.find({
+                                        sensor_id: sensorID, 
+                                        measurement_type: "temperature"
+                                    })
+                  .where('date').lt(aDayAgoDate)
+                  .limit(1)
+                  .sort("-date")
+                  .exec(callback);
+            }
+        }, 
+        function(err, data){
+            if (err) {
+                errorFn(err);
+            } else {
+                var result = {};
+                if (data.lastOne && data.anHourAgo && data.aDayAgo) {
+                    result.values = [];
+                    result.date_offset = [];
+                    result.sensor_id = sensorID;
+                    result.measurement_type = data.lastOne[0].measurementType;
+
+                    result.most_recent_measurement_date = data.lastOne[0].date;
+                    result.oldest_measurement_date = data.aDayAgo[0].date;
+
+                    var timeStamp = result.oldest_measurement_date.getTime()/1000;
+
+                    result.values.unshift(data.lastOne[0].value);
+                    result.date_offset.unshift(data.lastOne[0].date.getTime()/1000 - timeStamp);
+
+                    result.values.unshift(data.anHourAgo[0].value);
+                    result.date_offset.unshift(data.anHourAgo[0].date.getTime()/1000 - timeStamp);
+
+                    result.values.unshift(data.aDayAgo[0].value);
+                    result.date_offset.unshift(data.aDayAgo[0].date.getTime()/1000 - timeStamp);
+                }
+                successFn(result);
+            }
+        }
+    );
+
+    /*
     RawMeasurement.find({sensor_id: sensorID, measurement_type: "temperature"})
                   .limit(1)
                   .sort("-date")
@@ -295,6 +360,7 @@ function GetLastTemperature2(sensorID, successFn, errorFn) {
                     else
                         successFn(temperatureMeasurement)
                   });
+*/
 }
 
 function GetHourlyTemperatures2(sensorID, successFn, errorFn) {
@@ -887,6 +953,7 @@ exports.SaveLuminosity2 = SaveLuminosity2;
 exports.SaveHumidity2 = SaveHumidity2;
 exports.GetRawMeasurement = GetRawMeasurement;
 exports.GetHourlyMeasurement = GetHourlyMeasurement;
+exports.GetLastTemperature2 = GetLastTemperature2;
 
 exports.RemoveHourlyMeasurementOlderThan = RemoveHourlyMeasurementOlderThan;
 exports.RemoveRawMeasurementOlderThan = RemoveRawMeasurementOlderThan;

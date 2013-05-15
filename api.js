@@ -77,6 +77,18 @@ function getTemperature(req, res, next) {
                                 });
 }
 
+function getLastTemperature(req, res, next)
+{
+    storage.GetLastTemperature2(req.params.sensorID, 
+                                function success(result) {
+                                    res.send(result);
+                                    next();
+                                }, 
+                                function error(err) {
+                                    return next(new restify.BadRequestError(err));
+                                });
+}
+
 function getHourlyTemperature(req, res, next) {
     var options = getOptionsFromQueryString(req);
 
@@ -251,6 +263,8 @@ server.get('/luminosity/raw/:sensorID', getLuminosity);
 server.get('/temperature/hourly/:sensorID', getHourlyTemperature);
 server.get('/humidity/hourly/:sensorID', getHourlyHumidity);
 server.get('/luminosity/hourly/:sensorID', getHourlyLuminosity);
+
+server.get('/temperature/last/:sensorID', getLastTemperature);
 
 server.get('/status', status);
 
