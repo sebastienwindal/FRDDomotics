@@ -284,7 +284,7 @@ function SaveHourlyMeasurement(sensorID, measurementType, measurementDate, cumul
 }
 
 
-function GetLastTemperature2(sensorID, successFn, errorFn) {
+function GetLastValue(measurementType, sensorID, successFn, errorFn) {
     if (!sensorID)
         errorFn("invalid sensorID");
 
@@ -292,7 +292,7 @@ function GetLastTemperature2(sensorID, successFn, errorFn) {
         {
             lastOne: function(callback){
                 RawMeasurement.find({   sensor_id: sensorID, 
-                                        measurement_type: "temperature"
+                                        measurement_type: measurementType
                                     })
                   .limit(1)
                   .sort("-date")
@@ -301,7 +301,7 @@ function GetLastTemperature2(sensorID, successFn, errorFn) {
             anHourAgo: function(callback){
                 var anHourAgoDate = moment().subtract('hours', 1);
                 RawMeasurement.find({   sensor_id: sensorID, 
-                                        measurement_type: "temperature"
+                                        measurement_type: measurementType
                                     })
                   .where('date').lt(anHourAgoDate)
                   .limit(1)
@@ -312,7 +312,7 @@ function GetLastTemperature2(sensorID, successFn, errorFn) {
                 var aDayAgoDate = moment().subtract('days', 1);
                 RawMeasurement.find({
                                         sensor_id: sensorID, 
-                                        measurement_type: "temperature"
+                                        measurement_type: measurementType
                                     })
                   .where('date').lt(aDayAgoDate)
                   .limit(1)
@@ -329,7 +329,7 @@ function GetLastTemperature2(sensorID, successFn, errorFn) {
                     result.values = [];
                     result.date_offset = [];
                     result.sensor_id = sensorID;
-                    result.measurement_type = data.lastOne[0].measurementType;
+                    result.measurement_type = measurementType;
                     if (data.lastOne.length > 0) {
                         result.most_recent_measurement_date = data.lastOne[0].date;
                     }
@@ -355,23 +355,11 @@ function GetLastTemperature2(sensorID, successFn, errorFn) {
                         result.date_offset.unshift(data.aDayAgo[0].date.getTime()/1000 - timeStamp);
                     }
                 }
-console.log(result);
                 successFn(result);
             }
         }
     );
 
-    /*
-    RawMeasurement.find({sensor_id: sensorID, measurement_type: "temperature"})
-                  .limit(1)
-                  .sort("-date")
-                  .exec(function(err, temperatureMeasurement) {
-                    if (err)
-                        errorFn(err);
-                    else
-                        successFn(temperatureMeasurement)
-                  });
-*/
 }
 
 function GetHourlyTemperatures2(sensorID, successFn, errorFn) {
@@ -894,7 +882,7 @@ exports.SaveLuminosity2 = SaveLuminosity2;
 exports.SaveHumidity2 = SaveHumidity2;
 exports.GetRawMeasurement = GetRawMeasurement;
 exports.GetHourlyMeasurement = GetHourlyMeasurement;
-exports.GetLastTemperature2 = GetLastTemperature2;
+exports.GetLastValue = GetLastValue;
 
 exports.RemoveHourlyMeasurementOlderThan = RemoveHourlyMeasurementOlderThan;
 exports.RemoveRawMeasurementOlderThan = RemoveRawMeasurementOlderThan;
