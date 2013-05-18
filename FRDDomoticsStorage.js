@@ -330,21 +330,32 @@ function GetLastTemperature2(sensorID, successFn, errorFn) {
                     result.date_offset = [];
                     result.sensor_id = sensorID;
                     result.measurement_type = data.lastOne[0].measurementType;
-
-                    result.most_recent_measurement_date = data.lastOne[0].date;
-                    result.oldest_measurement_date = data.aDayAgo[0].date;
-
+                    if (data.lastOne.length > 0) {
+                        result.most_recent_measurement_date = data.lastOne[0].date;
+                    }
+                    if (data.aDayAgo.length > 0) {
+                        result.oldest_measurement_date = data.aDayAgo[0].date;
+                    } else if (data.anHourAgo.length > 0) {
+                        result.oldest_measurement_date = data.anHourAgo[0].date;
+                    } else {
+                        result.oldest_measurement_date = data.lastOne[0].date;
+                    }
                     var timeStamp = result.oldest_measurement_date.getTime()/1000;
 
                     result.values.unshift(data.lastOne[0].value);
                     result.date_offset.unshift(data.lastOne[0].date.getTime()/1000 - timeStamp);
 
-                    result.values.unshift(data.anHourAgo[0].value);
-                    result.date_offset.unshift(data.anHourAgo[0].date.getTime()/1000 - timeStamp);
+                    if (data.anHourAgo.length > 0) {
+                        result.values.unshift(data.anHourAgo[0].value);
+                        result.date_offset.unshift(data.anHourAgo[0].date.getTime()/1000 - timeStamp);
+                    }
 
-                    result.values.unshift(data.aDayAgo[0].value);
-                    result.date_offset.unshift(data.aDayAgo[0].date.getTime()/1000 - timeStamp);
+                    if (data.aDayAgo.length > 0) {
+                        result.values.unshift(data.aDayAgo[0].value);
+                        result.date_offset.unshift(data.aDayAgo[0].date.getTime()/1000 - timeStamp);
+                    }
                 }
+console.log(result);
                 successFn(result);
             }
         }
