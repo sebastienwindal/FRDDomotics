@@ -80,9 +80,9 @@ function getTemperature(req, res, next) {
 }
 
 
-function getLastTemperature(req, res, next)
+function getLastTemperatureForSensor(req, res, next)
 {
-    storage.GetLastValue(   "temperature",
+    storage.GetLastValueForSensor(   "temperature",
                             req.params.sensorID, 
                             function success(result) {
                                 res.send(result);
@@ -93,9 +93,9 @@ function getLastTemperature(req, res, next)
                             });
 }
 
-function getLastHumidity(req, res, next)
+function getLastHumidityForSensor(req, res, next)
 {
-    storage.GetLastValue(   "humidity",
+    storage.GetLastValueForSensor(   "humidity",
                             req.params.sensorID, 
                             function success(result) {
                                 res.send(result);
@@ -106,9 +106,9 @@ function getLastHumidity(req, res, next)
                             });
 }
 
-function getLastLuminosity(req, res, next)
+function getLastLuminosityForSensor(req, res, next)
 {
-    storage.GetLastValue(   "luminosity",
+    storage.GetLastValueForSensor(   "luminosity",
                             req.params.sensorID, 
                             function success(result) {
                                 res.send(result);
@@ -198,6 +198,40 @@ function getLuminosity(req, res, next) {
                                 function error(err) {
                                     return next(new restify.BadRequestError(err));
                                 });
+}
+
+
+function getLastTemperature(req, res, next) {
+
+    storage.GetLastValueForAllSensors("temperature", function successFn(data) {
+        res.send(data);
+        next();
+    }, 
+    function error(err) {
+        return next(new restify.BadRequestError(err));
+    });
+}
+
+function getLastLuminosity(req, res, next) {
+
+    storage.GetLastValueForAllSensors("luminosity", function successFn(data) {
+        res.send(data);
+        next();
+    }, 
+    function error(err) {
+        return next(new restify.BadRequestError(err));
+    });
+}
+
+function getLastHumidity(req, res, next) {
+    
+    storage.GetLastValueForAllSensors("humidity", function successFn(data) {
+        res.send(data);
+        next();
+    }, 
+    function error(err) {
+        return next(new restify.BadRequestError(err));
+    });
 }
 
 // complete
@@ -294,9 +328,14 @@ server.get('/temperature/hourly/:sensorID', getHourlyTemperature);
 server.get('/humidity/hourly/:sensorID', getHourlyHumidity);
 server.get('/luminosity/hourly/:sensorID', getHourlyLuminosity);
 
-server.get('/temperature/last/:sensorID', getLastTemperature);
-server.get('/humidity/last/:sensorID', getLastHumidity);
-server.get('/luminosity/last/:sensorID', getLastLuminosity);
+server.get('/temperature/last/:sensorID', getLastTemperatureForSensor);
+server.get('/humidity/last/:sensorID', getLastHumidityForSensor);
+server.get('/luminosity/last/:sensorID', getLastLuminosityForSensor);
+
+server.get('/temperature/last', getLastTemperature);
+server.get('/humidity/last', getLastHumidity);
+server.get('/luminosity/last', getLastLuminosity);
+
 
 server.get('/status', status);
 
