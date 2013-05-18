@@ -77,7 +77,7 @@ function handleAnswer(error, response, body) {
                                                     lastMeasurementDate,
                                                     true,
                                                     function success() {
-                                                        console.log('temperature saved ' + data.val.value);
+                                                        console.log('temperature saved' );
                                                     },
                                                     function error(err) {
                                                         console.log('temperature could not be saved. ' + err);
@@ -89,7 +89,7 @@ function handleAnswer(error, response, body) {
                                                     lastMeasurementDate,
                                                     true,
                                                     function success() {
-                                                        console.log('luminosity saved ' + data.val.value);
+                                                        console.log('luminosity saved ');
                                                     },
                                                     function error(err) {
                                                         console.log('luminosity could not be saved. ' + err);
@@ -101,7 +101,7 @@ function handleAnswer(error, response, body) {
                                                     lastMeasurementDate,
                                                     true,
                                                     function success() {
-                                                        console.log('humidity saved ' + data.val.value);
+                                                        console.log('humidity saved ');
                                                     },
                                                     function error(err) {
                                                         console.log('humidity could not be saved. ' + err);
