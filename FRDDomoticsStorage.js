@@ -322,6 +322,9 @@ function GetLastValueForAllSensors(measurementType, successFn, errorFn) {
                                 } else {
                                     var result = [];
 
+                                    _.each(sensors, function(sensor) {
+                                        data[sensor.sensor_id].location = sensor.location;
+                                    });
                                     _.map(data, function(val, key) {
                                         result.push(val);    
                                     });
