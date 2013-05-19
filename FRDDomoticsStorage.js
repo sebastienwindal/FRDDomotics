@@ -322,9 +322,6 @@ function GetLastValueForAllSensors(measurementType, successFn, errorFn) {
                                 } else {
                                     var result = [];
 
-                                    _.each(sensors, function(sensor) {
-                                        data[sensor.sensor_id].location = sensor.location;
-                                    });
                                     _.map(data, function(val, key) {
                                         result.push(val);    
                                     });
@@ -370,6 +367,11 @@ function GetLastValueForSensor(measurementType, sensorID, successFn, errorFn) {
                   .limit(1)
                   .sort("-date")
                   .exec(callback);
+            },
+            sensor: function(callback) {
+                Sensor  .find({ sensor_id: sensorID})
+                        .select({_id: 0, __v: 0})
+                        .exec(callback);
             }
         }, 
         function(err, data){
@@ -377,10 +379,13 @@ function GetLastValueForSensor(measurementType, sensorID, successFn, errorFn) {
                 errorFn(err);
             } else {
                 var result = {};
-                if (data.lastOne && data.anHourAgo && data.aDayAgo) {
+                if (data.lastOne && data.anHourAgo && data.aDayAgo && data.sensor && data.sensor.length > 0) {
                     result.values = [];
                     result.date_offset = [];
                     result.sensor_id = sensorID;
+                    result.location = data.sensor.location;
+                    result.sensor = data.sensor[0];
+
                     result.measurement_type = measurementType;
                     if (data.lastOne.length > 0) {
                         result.most_recent_measurement_date = data.lastOne[0].date;
