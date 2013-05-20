@@ -53,7 +53,7 @@ function getOptionsFromQueryString(req) {
         options.startDate = req.params.startDate;
     }
     if (req.params.endDate) {
-        options.startDate = req.params.endDate;
+        options.endDate = req.params.endDate;
     }
     if (req.params.timeSpan) {
         options.timeSpan = req.params.timeSpan;
@@ -224,7 +224,7 @@ function getLastLuminosity(req, res, next) {
 }
 
 function getLastHumidity(req, res, next) {
-    
+
     storage.GetLastValueForAllSensors("humidity", function successFn(data) {
         res.send(data);
         next();
