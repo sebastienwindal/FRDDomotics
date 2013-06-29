@@ -119,6 +119,19 @@ function getLastLuminosityForSensor(req, res, next)
                             });
 }
 
+function getLastLevelForSensor(req, res, next) {
+    storage.GetLastValueForSensor(   "level",
+                            req.params.sensorID, 
+                            function success(result) {
+                                res.send(result);
+                                next();
+                            }, 
+                            function error(err) {
+                                return next(new restify.BadRequestError(err));
+                            });
+
+}
+
 function getHourlyTemperature(req, res, next) {
     var options = getOptionsFromQueryString(req);
 
@@ -200,6 +213,20 @@ function getLuminosity(req, res, next) {
                                 });
 }
 
+function getLevel(req, res, next) {
+    var options = getOptionsFromQueryString(req);
+
+    storage.GetRawMeasurement(  req.params.sensorID, 
+                                "level", 
+                                options,
+                                function success(data) {
+                                    res.send(data);
+                                    next();
+                                },
+                                function error(err) {
+                                    return next(new restify.BadRequestError(err));
+                                });
+}
 
 function getLastTemperature(req, res, next) {
 
@@ -333,6 +360,7 @@ server.put('/sensor/:sensorID', updateSensor);
 server.get('/temperature/raw/:sensorID', getTemperature);
 server.get('/humidity/raw/:sensorID', getHumidity);
 server.get('/luminosity/raw/:sensorID', getLuminosity);
+server.get('/level/raw/:sensorID', getLevel);
 
 server.get('/temperature/hourly/:sensorID', getHourlyTemperature);
 server.get('/humidity/hourly/:sensorID', getHourlyHumidity);
@@ -341,6 +369,7 @@ server.get('/luminosity/hourly/:sensorID', getHourlyLuminosity);
 server.get('/temperature/last/:sensorID', getLastTemperatureForSensor);
 server.get('/humidity/last/:sensorID', getLastHumidityForSensor);
 server.get('/luminosity/last/:sensorID', getLastLuminosityForSensor);
+server.get('/level/last/:sensorID', getLastLevelForSensor);
 
 server.get('/temperature/last', getLastTemperature);
 server.get('/humidity/last', getLastHumidity);
