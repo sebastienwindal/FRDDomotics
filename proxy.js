@@ -149,14 +149,13 @@ function handleAnswer(error, response, body) {
                                 storage.SaveLevelChange(sensorID, new Date(), data.value);
                                 console.log("level " + sensorID + " is now " + data.value);
                                 rulesEngine.evaluateLevelRulesForSensor(sensorID, function(evalResult) {
-                                    if (evalResult.isMatch)
-                                        console.log(evalResult);
-
-                                    frdApn.sendApnNotification({
-                                        'alert': evalResult.message,
-                                        'sensor_id': sensorID,
-                                        'measurement_type': evalResult.measurement_type,
-                                    });
+                                    if (evalResult.isMatch) {
+                                        frdApn.sendApnNotification({
+                                            'alert': evalResult.message,
+                                            'sensor_id': sensorID,
+                                            'measurement_type': evalResult.measurement_type,
+                                        });
+                                    }
                                 });
                             },
                             function(err) {

@@ -16,18 +16,18 @@ var token = "fb6dbc931ba99e37422299c40958ed118deaad05010beb1dfcb04a8a9c5aa7df";
 var device = null;
 
 function sendApnNotification(notificationData) {
-
+console.log("1");
     if (!device)
         initDevice();
-
+console.log("2");
     var note = new apn.Notification();
-
+console.log(note);
     note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
     note.badge = 3;
     note.sound = "ping.aiff";
     note.alert = notificationData.alert;
 
-    note.payload = notificationData; //{'messageFrom': 'Caroline'};
+    note.payload = notificationData;
 
     apnConnection.pushNotification(note, device);
 }
