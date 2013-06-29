@@ -57,20 +57,26 @@ var HourlyMeasurement = mongoose.model('HourlyMeasurement', rollupMeasurementSch
 
 
 function GetSensor2(sensorID, successFn, errorFn) {
-    Sensor  .find({ sensor_id: sensorID})
-            .select({_id: 0, __v: 0})
-            .exec(function(err, sensor) {
-        if (err)
-            errorFn(err);
-        else {
-            if (sensor.length == 1) {
-                successFn(sensor[0]);
-            } else {
-                successFn({}); 
+    var promise = Sensor.find({ sensor_id: sensorID})
+                        .select({_id: 0, __v: 0});
+
+    if (successFn && errorFn) {
+        promise.exec(function(err, sensor) {
+            if (err)
+                errorFn(err);
+            else {
+                if (sensor.length == 1) {
+                    successFn(sensor[0]);
+                } else {
+                    successFn({}); 
+                }
             }
-        }
-    });
+        });
+    } else {
+        return promise.exec();
+    }
 }
+
 function GetAllSensors2(successFn, errorFn) {
     Sensor  .find({ })
             .sort('name')
@@ -82,6 +88,38 @@ function GetAllSensors2(successFn, errorFn) {
                     successFn(sensor);
             });
 }
+
+function CreateSensor(sensor) {
+    if (!sensor.sensor_id) {
+        var p = new mongoose.Promise();
+        p.reject("invalid sensor ID");
+        return p;
+    }
+
+    if (!sensor.capabilities || sensor.capabilities.length == 0) {
+        var p = new mongoose.Promise();
+        p.reject("sensor must have at least one capability");
+        return p;
+    }
+
+    var newSensor = new Sensor({
+        sensor_id: sensor.sensor_id,
+        name: sensor.name,
+        description: sensor.description,
+        location: sensor.location,
+        capabilities: sensor.capabilities
+    });
+    var p = new mongoose.Promise();
+    newSensor.save(function(err, sensor) {
+        if (err) {
+            p.reject(err);
+        } else {
+            p.fulfill();
+        }
+    });
+    return p;
+}
+
 function CreateSensor2(sensor, successFn, errorFn) {
 
     if (!sensor.sensor_id) {
@@ -94,15 +132,8 @@ function CreateSensor2(sensor, successFn, errorFn) {
         return;
     }
 
-    var newSensor = new Sensor({
-        sensor_id: sensor.sensor_id,
-        name: sensor.name,
-        description: sensor.description,
-        location: sensor.location,
-        capabilities: sensor.capabilities
-    });
 
-    newSensor.save(function(err, createdSensor) {
+    CreateSensor(sensor).then(function(err, createdSensor) {
         if (err)
             errorFn(err);
         else
@@ -247,6 +278,37 @@ function SaveHumidity2(sensorID, humidity, date, updateHourly, successFn, errorF
     });
 
     SaveMeasurement2(measurement, updateHourly, successFn, errorFn);
+}
+
+
+function SaveLevelChange(sensorID, date, isTriggered) {
+
+    if (!sensorID) {
+        var p = new mongoose.Promise();
+        p.reject("invalid sensor ID");
+        return p;
+    }
+
+    var p = new mongoose.Promise();
+
+    var measurement = new RawMeasurement({
+        sensor_id: sensorID,
+        measurement_type: "level",
+        value: (isTriggered ? 1 : 0),
+        date: date
+    });
+
+    SaveMeasurement2(measurement, 
+                     false, 
+                     function() {
+                        console.log("saved");
+                        p.fulfill();
+                     }, 
+                     function(err) {
+                        console.log(err);
+                        p.reject(err.message);
+                     });
+    return p;
 }
 
 function GetStats(successFn, errorFn) {
@@ -598,12 +660,15 @@ function RemoveHourlyMeasurementOlderThan(sensorID, measurementType, date, succe
 
 exports.GetSensor2 = GetSensor2;
 exports.GetAllSensors2 = GetAllSensors2;
+exports.CreateSensor = CreateSensor;
 exports.CreateSensor2 = CreateSensor2;
 exports.RemoveSensor2 = RemoveSensor2;
 exports.UpdateSensor2 = UpdateSensor2;
 exports.SaveTemperature2 = SaveTemperature2;
 exports.SaveLuminosity2 = SaveLuminosity2;
 exports.SaveHumidity2 = SaveHumidity2;
+exports.SaveLevelChange = SaveLevelChange;
+
 exports.GetRawMeasurement = GetRawMeasurement;
 exports.GetHourlyMeasurement = GetHourlyMeasurement;
 exports.GetLastValueForSensor = GetLastValueForSensor;

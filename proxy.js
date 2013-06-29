@@ -8,6 +8,7 @@ var https = require('https')
   , request = require('request')
   , storage = require('./FRDDomoticsStorage.js')
   , static = require('node-static')
+  , frdApn = require('./FRDDomoticsAPN.js')
   ;
 
 var proxyPort = 8000;
@@ -60,12 +61,17 @@ function requestData(timeStamp) {
 }
 
 function handleAnswer(error, response, body) {
+    
     if (!error && response.statusCode == 200) {    
         var obj = JSON.parse(body);
+
         for (key in obj) {
+            // is it a multi-sensor?
+            // starts with devices.{deviceID}}.instances.0.commandClasses.49.data
             var regEx = new RegExp(/^devices\.([0-9]+)\.instances\.0\.commandClasses\.49\.data/);
             var match = regEx.exec(key);
             if (match && match[1]) {
+
                 var sensorID = match[1];
                 console.log('sensorID: ' + sensorID);
                 var data = obj[key];
@@ -110,13 +116,54 @@ function handleAnswer(error, response, body) {
                     }
                 }
             }
+
+            // is it a level?
+            // starts with devices.{deviceID}}.instances.0.commandClasses.48.data.level
+            regEx = new RegExp(/^devices\.([0-9]+)\.instances\.0\.commandClasses\.48\.data\.level/);
+            match = regEx.exec(key);
+            if (match) {
+                var sensorID = match[1];
+
+                console.log('level sensorID: ' + sensorID);
+                var data = obj[key];
+
+                var getSensor = storage.GetSensor2(sensorID);
+                
+                getSensor
+                    .then(  function(sensorData) {
+                                if (!sensorData || sensorData.length == 0) {
+                                    var p = storage.CreateSensor({
+                                        sensor_id: sensorID,
+                                        name: "level " + sensorID,
+                                        description: "level sensor",
+                                        location: "unknown",
+                                        capabilities: ["level"]
+                                    });
+                                    return p;
+                                }
+                            })
+                    .then(  function() {
+                                // ok here we know we have a sensor in the db,
+                                // add a row to record the change that was just triggered...
+                                storage.SaveLevelChange(sensorID, new Date(), data.value);
+                                console.log("level " + sensorID + " is now " + data.value);
+                            },
+                            function(err) {
+                                console.log("level " + sensorID + " " + err);
+                            }
+                    );              
+                
+            }
         }
         setTimeout(function () {
                         requestData(obj.updateTime);
-                    }, 10000);
+                    }, 1000);
     }
 }
 
+//frdApn.sendApnNotification({
+//        'alert': 'HOT ALERT' 
+//    });
 
 var timeStamp = Math.floor((new Date()).getTime() / 1000);
 requestData(timeStamp);
