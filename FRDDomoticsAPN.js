@@ -19,9 +19,7 @@ function sendApnNotification(notificationData) {
 
     if (!device)
         initDevice();
-    console.log(apnOptions);
-    console.log(apnConnection);
-    console.log(device);
+    
     var note = new apn.Notification();
 
     note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
