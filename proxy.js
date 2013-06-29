@@ -9,6 +9,7 @@ var https = require('https')
   , storage = require('./FRDDomoticsStorage.js')
   , static = require('node-static')
   , frdApn = require('./FRDDomoticsAPN.js')
+  , rulesEngine = require('./FRDDomoticsRulesEngine.js')
   ;
 
 var proxyPort = 8000;
@@ -147,6 +148,16 @@ function handleAnswer(error, response, body) {
                                 // add a row to record the change that was just triggered...
                                 storage.SaveLevelChange(sensorID, new Date(), data.value);
                                 console.log("level " + sensorID + " is now " + data.value);
+                                rulesEngine.evaluateLevelRulesForSensor(sensorID, function(evalResult) {
+                                    if (evalResult.isMatch)
+                                        console.log(evalResult);
+
+                                    frdApn.sendApnNotification({
+                                        'alert': evalResult.message,
+                                        'sensor_id': sensorID,
+                                        'measurement_type': evalResult.measurement_type,
+                                    });
+                                });
                             },
                             function(err) {
                                 console.log("level " + sensorID + " " + err);
@@ -161,9 +172,6 @@ function handleAnswer(error, response, body) {
     }
 }
 
-//frdApn.sendApnNotification({
-//        'alert': 'HOT ALERT' 
-//    });
 
 var timeStamp = Math.floor((new Date()).getTime() / 1000);
 requestData(timeStamp);

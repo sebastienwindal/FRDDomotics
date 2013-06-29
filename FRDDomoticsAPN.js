@@ -30,8 +30,6 @@ function sendApnNotification(notificationData) {
     note.payload = notificationData; //{'messageFrom': 'Caroline'};
 
     apnConnection.pushNotification(note, device);
-
-
 }
 
 function initDevice() {
