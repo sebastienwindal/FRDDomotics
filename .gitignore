@@ -3,3 +3,9 @@ users/*.pwd
 node_modules/*
 dump*
 FRDDomotics.db
+
+crypto/APN.pwd
+
+crypto/APN.cer
+
+crypto/APN.p12
