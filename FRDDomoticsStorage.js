@@ -371,8 +371,10 @@ function GetLastValueForAllSensors(measurementType, successFn, errorFn) {
                         var asyncList = {};
 
                         _.each(sensors, function(sensor) {
-                            var o = new asyncWrapper(sensor.sensor_id, measurementType);
-                            asyncList[sensor.sensor_id] = o.exec;
+                            if (_.contains(sensor.capabilities, measurementType)) {
+                                var o = new asyncWrapper(sensor.sensor_id, measurementType);
+                                asyncList[sensor.sensor_id] = o.exec;
+                            }
                         });
 
 
@@ -447,17 +449,21 @@ function GetLastValueForSensor(measurementType, sensorID, successFn, errorFn) {
                     result.sensor_id = sensorID;
                     result.location = data.sensor.location;
                     result.sensor = data.sensor[0];
-
+                    
                     result.measurement_type = measurementType;
                     if (data.lastOne.length > 0) {
-                        result.most_recent_measurement_date = data.lastOne[0].date;
+                        if (data.lastOne[0])
+                            result.most_recent_measurement_date = data.lastOne[0].date;
                     }
                     if (data.aDayAgo.length > 0) {
-                        result.oldest_measurement_date = data.aDayAgo[0].date;
+                        if (data.aDayAgo[0])
+                            result.oldest_measurement_date = data.aDayAgo[0].date;
                     } else if (data.anHourAgo.length > 0) {
-                        result.oldest_measurement_date = data.anHourAgo[0].date;
+                        if (data.anHourAgo[0])
+                            result.oldest_measurement_date = data.anHourAgo[0].date;
                     } else {
-                        result.oldest_measurement_date = data.lastOne[0].date;
+                        if (data.lastOne[0])
+                            result.oldest_measurement_date = data.lastOne[0].date;
                     }
                     var timeStamp = result.oldest_measurement_date.getTime()/1000;
 

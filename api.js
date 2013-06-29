@@ -234,6 +234,16 @@ function getLastHumidity(req, res, next) {
     });
 }
 
+function getLastLevel(req, res, next) {
+    storage.GetLastValueForAllSensors("level", function successFn(data) {
+        res.send(data);
+        next();
+    }, 
+    function error(err) {
+        return next(new restify.BadRequestError(err));
+    });
+}
+
 // complete
 function getAllSensors(req, res, next) {
     
@@ -335,6 +345,7 @@ server.get('/luminosity/last/:sensorID', getLastLuminosityForSensor);
 server.get('/temperature/last', getLastTemperature);
 server.get('/humidity/last', getLastHumidity);
 server.get('/luminosity/last', getLastLuminosity);
+server.get('/level/last', getLastLevel);
 
 
 server.get('/status', status);
