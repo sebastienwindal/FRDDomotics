@@ -2,6 +2,7 @@
 layout: default
 title: FRDDomotics
 helloworld: yo mama
+tagline: Home automation with Raspbery pi, Z-wave, nodeJS and cocoa.
 ---
 
 
