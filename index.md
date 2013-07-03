@@ -4,7 +4,7 @@ title: FRDDomotics
 ---
 
 
-# Hardware
+## Hardware
 
 * A raspbery pi
 * a z-wave daugther card
@@ -12,7 +12,7 @@ title: FRDDomotics
 door/window switch).
 
 
-# Software, back end
+## Software, back end
 
 Mostly a MEAN stack, even though I really am not doing anything with express.
 
@@ -23,8 +23,20 @@ Mostly a MEAN stack, even though I really am not doing anything with express.
 * push notifications
 * proxy stuff
 
-# Software, a _NATIVE_ iPhone App
+## Software, a __NATIVE__ iPhone App
 
-I save this in a separate repo iFRDDomotics.
+I saved this in a separate repo iFRDDomotics.
 
 REST client: AFNetworking and Mantle
+
+Few screen shots:
+
+![](images/iphone1_.png)
+![](images/iphone2_.png)
+![](images/iphone3_.png)
+![](images/iphone4_.png)
+![](images/iphone5_.png)
+![](images/iphone6_.png)
+![](images/iphone7_.png)
+![](images/iphone8_.png)
+![](images/iphone9_.png)
