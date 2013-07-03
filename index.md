@@ -1,6 +1,7 @@
 ---
 layout: default
 title: FRDDomotics
+helloworld: yo mama
 ---
 
 
