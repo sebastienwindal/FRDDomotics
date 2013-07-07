@@ -27,7 +27,7 @@ Mostly a MEAN stack, even though I am running node static instead of express to 
 
 The first one (proxy.js) is running <a href="https://github.com/nodejitsu/node-http-proxy">node Jitsu node-http-proxy</a> for node JS and a node static/<a href="http://angularjs.org/">AngularJS</a> test web app.
 
-```bash
+```
 $ node proxy.js
 https proxy server started on port 8000
 proxy routing:
@@ -39,7 +39,7 @@ This server is also running a task that listens for events from the Z-Wave daemo
 
 The second one is running the REST API, implemented using <a href="https://github.com/mcavage/node-restify">node restify plugin</a>.
 
-```bash
+```
 $ node api.js
 ```
 
@@ -48,7 +48,7 @@ $ node api.js
 The proxy server is by default listening on port 8000 and HTTPS is enabled both for the HTML server and the API REST server.
 I curently am using a self signed SSL certificate, use the -k option if you'd like to try the API with CURL.
 
-```bash
+```
 $ curl -u username:password -k https://ipaddress:8000/api/about
 {
     "name": "FRDDomoticsAPI",
