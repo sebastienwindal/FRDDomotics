@@ -26,13 +26,13 @@ Mostly a MEAN stack, even though I am running node static instead of express to 
 
 The first one (proxy.js) is running <a href="https://github.com/nodejitsu/node-http-proxy">node Jitsu node-http-proxy</a> for node JS and a node static/<a href="http://angularjs.org/">AngularJS</a> test web app.
 
-```
-$ node proxy.js
-https proxy server started on port 8000
-proxy routing:
-https://host:8000/api/{path} -> http://host:8081/{path}
-https://host:8000/{path} -> http://host:8080/{path}
-```
+    ```
+    $ node proxy.js
+    https proxy server started on port 8000
+    proxy routing:
+    https://host:8000/api/{path} -> http://host:8081/{path}
+    https://host:8000/{path} -> http://host:8080/{path}
+    ```
 
 This server is also running a task that listens for events from the Z-Wave daemon installed on the raspberry PI, it records changes pushed from the sensor to the database (a mongoDB instance), runs the APN (Apple Push Notification) logic and eventually pushes the notification out to the iPhone.
 
