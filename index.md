@@ -7,22 +7,24 @@ tagline: Home automation with Raspbery pi, Z-wave, nodeJS and cocoa.
 
 ## Hardware
 
-* [A raspbery pi](http://www.amazon.com/Raspberry-Pi-Model-Revision-512MB/dp/B009SQQF9C/ref=sr_1_1?ie=UTF8&qid=1372893768&sr=8-1&keywords=raspberry+pi) and a [z-wave GPIO daugther card](http://www.amazon.com/Z-Wave-Razberry-Pi-GPIO-Daughter-Card/dp/B00BL9QFH6/ref=pd_rhf_se_p_t_2_TJ5S).
+### A pi & a z-wave daughter card
+
+[A raspbery pi](http://www.amazon.com/Raspberry-Pi-Model-Revision-512MB/dp/B009SQQF9C/ref=sr_1_1?ie=UTF8&qid=1372893768&sr=8-1&keywords=raspberry+pi) and a [z-wave GPIO daugther card](http://www.amazon.com/Z-Wave-Razberry-Pi-GPIO-Daughter-Card/dp/B00BL9QFH6/ref=pd_rhf_se_p_t_2_TJ5S).
 
 ![](images/Razberry-zwave1.jpg)
 
 The ZWave controller is the small card on top of the pi, it costs about twice as much as the pi.
 
-* an assortments of z-wave sensors.
+### Assortment of z-wave sensors
 
 My setup currently includes 2 [aeon labs multi-sensors](http://www.amazon.com/Aeon-Labs-DSB05106-ZWUS-Z-Wave-Multi-sensor/dp/B008D5TYGU/ref=sr_1_fkmr0_1?ie=UTF8&qid=1372893939&sr=8-1-fkmr0&keywords=insteon+multi-+sensor) (temperature, humidity and luminosity), 1 [aeon labs door/window sensor](http://www.amazon.com/Aeon-Labs-Z-Wave-Window-Sensor/dp/B004ETD4VU/ref=pd_sim_hi_4) and one [Schlage door/window sensor](http://www.amazon.com/Schlage-RS100HC-SL-Window-Intelligence/dp/B008Q5CTBE/ref=pd_sim_hi_1).
 
 
-## Back end
+## Back-end
 
 Mostly a MEAN stack, even though I am running node static instead of express to serve my angularJS test UI.
 
-* Two nodeJS instances.
+### Two nodeJS instances
 
 The first one (proxy.js) is running <a href="https://github.com/nodejitsu/node-http-proxy">node Jitsu node-http-proxy</a> for node JS and a node static/<a href="http://angularjs.org/">AngularJS</a> test web app.
 
@@ -40,7 +42,7 @@ The second one is running the REST API, implemented using <a href="https://githu
     $ node api.js
 
 
-* Security
+### Security
 
 The proxy server is by default listening on port 8000 and HTTPS is enabled both for the HTML server and the API REST server.
 I curently am using a self signed SSL certificate, use the -k option if you'd like to try the API with CURL.
@@ -63,23 +65,24 @@ the database to store user data but to store for each authorized user a blob of 
 Files are created from the comnand line using the ```genpwd.sh``` script and data in the HTTP header are matched against 
 data in those files. Checkout the Readme.md file in this folder.
 
-* mongodb with mongoose nodeJS.
+### MongoDB
 
-This is wrapped in the FRDDomoticsStorage.js file. It is using the [mongoose](http://mongoosejs.com) ODM.
+I am using a mongodb instance that I access with [mongoose](http://mongoosejs.com) ODM.
+This is wrapped in the FRDDomoticsStorage.js file. 
 
-* Push Notifications
+### Push Notifications
 
 FRDDomoticsAPN.js is wrapping the [node-apn](https://github.com/argon/node-apn) node module. Curently hard coded to send
 one push notification to only one device (my iPhone) each time my front door or garage door are opened of closed.
 
-## Front end: A __NATIVE__ iPhone App
+## Front end: A __NATIVE__* iPhone App
 
 I saved this in a separate repo [iFRDDomotics](https://github.com/sebastienwindal/iFRDDomotics/).
 
 To compile the project you will need [cocoapods](http://cocoapods.org/) installed on your machine and run 
 the ```pod install``` from the project main folder.
 
-Various notable libraried the app is using:
+Various notable libraries the app is using:
 
 * REST client: I am not the big fan of RestKit so I am using a more lightweight solution that consists of [AFNetworking](https://github.com/AFNetworking/AFNetworking) to perform HTTP requests and [Mantle](https://github.com/github/Mantle) as a model layer.
 * [NUI](https://github.com/tombenner/nui): The app appearance is customizable using CSS-like declaration, see them.nss file.
@@ -98,3 +101,6 @@ Few screen shots:
 ![](images/iphone7_.png)
 ![](images/iphone8_.png)
 ![](images/iphone9_.png)
+
+
+(*) F..k YEAH.
