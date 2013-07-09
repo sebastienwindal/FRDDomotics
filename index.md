@@ -7,7 +7,7 @@ tagline: Home automation with Raspbery pi, Z-wave, nodeJS and cocoa.
 
 ## Hardware
 
-### A pi & a z-wave daughter card
+### A pi and a z-wave daughter card
 
 [A raspbery pi](http://www.amazon.com/Raspberry-Pi-Model-Revision-512MB/dp/B009SQQF9C/ref=sr_1_1?ie=UTF8&qid=1372893768&sr=8-1&keywords=raspberry+pi) and a [z-wave GPIO daugther card](http://www.amazon.com/Z-Wave-Razberry-Pi-GPIO-Daughter-Card/dp/B00BL9QFH6/ref=pd_rhf_se_p_t_2_TJ5S).
 
@@ -75,7 +75,7 @@ This is wrapped in the FRDDomoticsStorage.js file.
 FRDDomoticsAPN.js is wrapping the [node-apn](https://github.com/argon/node-apn) node module. Curently hard coded to send
 one push notification to only one device (my iPhone) each time my front door or garage door are opened of closed.
 
-## Front end: A __NATIVE__* iPhone App
+## Front end: A __NATIVE__ iPhone App
 
 I saved this in a separate repo [iFRDDomotics](https://github.com/sebastienwindal/iFRDDomotics/).
 
@@ -101,6 +101,3 @@ Few screen shots:
 ![](images/iphone7_.png)
 ![](images/iphone8_.png)
 ![](images/iphone9_.png)
-
-
-(*) F..k YEAH.
