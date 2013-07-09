@@ -55,7 +55,7 @@ I curently am using a self signed SSL certificate, use the -k option if you'd li
         "versions": "0.1.0"
     }
 
-Read the README.md in the crypto subfolder to generate your own self-signed certificate or use a proper one if you have
+Read the [readme.md](https://github.com/sebastienwindal/FRDDomotics/blob/master/crypto/readme.md) in the crypto subfolder to generate your own self-signed certificate or use a proper one if you have
 one...
 
 In addition of SSL, all API requests are authenticated using HTTP Basic-Auth. The password and username passed in the HTTP
@@ -63,7 +63,7 @@ header are matched with data contained in the users folder. I decided to not use
 the database to store user data but to store for each authorized user a blob of data that consists of a SHA512 hash of ```"FRDDomotics-' + username + password```, one file per user.
 
 Files are created from the comnand line using the ```genpwd.sh``` script and data in the HTTP header are matched against 
-data in those files. Checkout the Readme.md file in this folder.
+data in those files. Checkout the [readme file](https://github.com/sebastienwindal/FRDDomotics/blob/master/users/readme.md) in this folder.
 
 ### MongoDB
 
